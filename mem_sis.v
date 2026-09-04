@@ -1,5 +1,5 @@
-
-module MEM(
+`timescale 1ns/1ns
+module mem_sis(
         input wire [7:0] rem_d, mux1,
         input wire r_z, write, read, clr, mux_sel1, rem_e, rdm_e,
         input wire clk,
