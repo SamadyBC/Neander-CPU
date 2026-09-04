@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module D_Flip_Flop_main #(
     parameter N = 8
 )(

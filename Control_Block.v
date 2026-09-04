@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module Control_Block (
     input wire NOP, STA, LDA, ADD, OR, AND, SUB, JMP, JN, JZ, N, SZ, clk, hlt, rst,
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM

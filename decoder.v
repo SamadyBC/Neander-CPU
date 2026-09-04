@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module decoder (
     input wire [3:0] Op,
     // Alterado de 'output wire' para 'output reg'
