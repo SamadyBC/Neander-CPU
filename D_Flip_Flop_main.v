@@ -1,12 +1,14 @@
-module D_Flip_Flop_main (
+module D_Flip_Flop_main #(
+    parameter N = 8
+)(
     input wire clk, reset, enable,
-    input wire [7:0] data,
-    output reg [7:0] data_out
+    input wire [N-1:0] data,
+    output reg [N-1:0] data_out
 );
 
 always @(posedge clk or posedge reset) begin
     if (reset) begin
-        data_out <= 8'b0;
+        data_out <= {N{1'b0}};
     end else if (enable) begin
         data_out <= data;
     end 
