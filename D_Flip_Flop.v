@@ -1,8 +1,8 @@
 module D_Flip_Flop (
     output reg Q,
-    input wire Clock, D
+    input wire clk, D
     );
-        always @(posedge Clock)
+        always @(posedge clk)
             if (Reset) begin
                 Q <= 1'b0;
             end
