@@ -34,15 +34,14 @@ module Main (
 
 
     // Area dos Registradores 
-    
-    D_Flip_Flop_main PC #(
-        .N(8)
-    ) (
+    //Aqui é um contador trocar
+    PC PC_main (
         .clk(clk),
         .reset(reset),
         .enable(incrementa_PC),
-        .data(ALU_input_Y),
-        .data_out(PC_out)
+        .load(carga_PC),
+        .count_in(ALU_input_Y),
+        .count(PC_out)
     );
 
     D_Flip_Flop_main AC #(
