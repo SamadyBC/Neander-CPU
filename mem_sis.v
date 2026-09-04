@@ -3,7 +3,8 @@ module mem_sis(
         input wire [7:0] rem_d, mux1,
         input wire r_z, write, read, clr, mux_sel1, rem_e, rdm_e,
         input wire clk,
-        output wire [7:0] rdm_out
+        output wire [7:0] rdm_out,
+        output wire [7:0] test_ram1
     );
 
     //Conexoes entre blocos 
@@ -99,6 +100,8 @@ module mem_sis(
     assign w_mem_data = current_state  == read_m ? mem[rem] : 8'h00;
 
     assign rdm_out = rdm;
+
+    assign test_ram1 = mem[0];
 
 
 endmodule
