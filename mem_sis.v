@@ -15,7 +15,10 @@ module MEM(
     //Registradores de Endereço e de Dados da Memoria
     reg [7:0] rem, rdm, mux_output;
 
+    //Memoria Ram - Vetor
+    reg [7:0] mem [0:255];
 
+    //Constantes para os estados 
     parameter wait_m = 2'b00,
         write_m = 2'b01,
         read_m = 2'b10,
@@ -46,11 +49,11 @@ module MEM(
                 wait_m: begin
                     //Nao faz nada
                 end
-                read_m: begin     
-                    //w_mem_data = mem[rem]
-                end
+                // read_m: begin     
+                //     
+                // end
                 write_m: begin
-                    //mem[rem] = rdm;
+                    mem[rem] <= rdm;
                 end
                 clear_m: begin
                     //mem = 0; - Ou nao limpar ou reset de todas as posicoes usando loop
@@ -65,11 +68,11 @@ module MEM(
         next_state = current_state;
         case(current_state)
             wait_m:  begin
-                if (write == 1) begin
+                if (write) begin
                     next_state = write_m;
-                end else if (read == 1) begin
+                end else if (read) begin
                     next_state = read_m;
-                end else if (clr == 1) begin
+                end else if (clr) begin
                     next_state = clear_m;
                 end
             end
@@ -84,7 +87,7 @@ module MEM(
         endcase
     end
 
-    //Logica Combinacional Independente do Clock
+    //Logica Combinacional - Independente do Clock
     always @ (*) begin
         case(mux_sel1)
             1'b0: mux_output = w_mem_data;
@@ -92,6 +95,8 @@ module MEM(
             default: mux_output = 8'h00;
         endcase
     end
+
+    assign w_mem_data = current_state  == read_m ? mem[rem] : 8'h00;
 
     assign rdm_out = rdm;
 
