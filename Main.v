@@ -4,8 +4,25 @@ module Main (
 );
 
     wire incrementa_PC, 
-    wire [7:0] ALU_output_Y;
+    reg [7:0] ALU_input_Y, saida_AC;
     wire [7:0] PC_out;
+    wire ALU_Y, ALU_NOT, ALU_OR, ALU_AND, ALU_ADD;
+    wire [7:0] ALU_out_input_AC;
+    wire ULA_n, ULA_z;
+
+    //Instanciação da ULA
+
+    ALU ALU_main (
+        .x(saida_AC),
+        .y(ALU_input_Y),
+        .op_alu({ALU_Y, ALU_NOT, ALU_OR, ALU_AND, ALU_ADD}),
+        .out(ALU_out_input_AC),
+        .n(ULA_n),
+        .z(ULA_z)
+    );
+
+
+
 
     // Area dos Registradores 
     
@@ -13,7 +30,7 @@ module Main (
         .clk(clk),
         .reset(reset),
         .enable(incrementa_PC),
-        .data(ALU_output_Y),
+        .data(ALU_input_Y),
         .data_out(PC_out)
     );
 

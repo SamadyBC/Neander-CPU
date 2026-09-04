@@ -1,19 +1,19 @@
 module ALU (
     input wire [7:0] x, y,
-    input wire [2:0] op_alu,
+    input wire [4:0] op_alu,
     output reg [7:0] out,
     output wire n, z
 );
 
     reg [7:0] sig1, sig2, sig3, sig4, sig5;
-
+//    OPULA foi colocado como 5 bits, sendo do mais significativo até o menos significativo a ordem: Y, NOT, OR, AND, ADD
     always @ (*) begin
         case(op_alu)
-            3'b000: out = sig1;
-            3'b001: out = sig2;
-            3'b010: out = sig3;
-            3'b011: out = sig4;
-            3'b100: out = sig5;
+            5'b00001: out = sig1;
+            5'b00100: out = sig2;
+            5'b00010: out = sig3;
+            5'b01000: out = sig4;
+            5'b10000: out = sig5;
             default: out = sig5;
         endcase
     end
