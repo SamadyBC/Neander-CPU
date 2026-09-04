@@ -3,10 +3,7 @@ module D_Flip_Flop (
     input wire clk, D
     );
         always @(posedge clk)
-            if (Reset) begin
-                Q <= 1'b0;
-            end
-            else begin
+             begin
                 Q <= D;
             end
 endmodule
