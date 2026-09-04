@@ -3,7 +3,7 @@ module Main (
     output reg [7:0] test
 );
 
-    wire incrementa_PC, 
+    wire incrementa_PC; 
     reg [7:0] ALU_input_Y, saida_AC;
     wire [7:0] PC_out;
     wire ALU_Y, ALU_NOT, ALU_OR, ALU_AND, ALU_ADD;
@@ -18,7 +18,8 @@ module Main (
 
     wire nop, sta, lda, add, OR, AND, NOT, JMP, jn, jz, hlt;
     wire sel, to_rem, write, read, selRDM,cargaREM;
-
+    wire unused;
+    assign test = saida_AC;
 
 // Memória
 
@@ -35,9 +36,43 @@ module Main (
         .rdm_e(cargaRDM),
         .clk(clk),
         .rdm_out(ALU_input_Y),
-    )
+    );
 
-
+    Control_Block Control (
+        .NOP(nop),
+        .STA(sta),
+        .LDA(lda),
+        .ADD(add),
+        .OR(OR),
+        .AND(AND),
+        .SUB(sub),
+        .JMP(jmp),
+        .JN(jn),
+        .JZ(jz),
+        .N(n_to_cntrl),
+        .SZ(z_to_cntrl),
+        .clk(clk),
+        .hlt(hlt),
+        .rst(reset),
+        .cargaRI(carga_RI),
+        .gotot0(unused),
+        .selRDM(selRDM),
+        .carga_AC(carga_AC),
+        .carga_NZ(carga_NZ),
+        .carga_PC(carga_PC),
+        .incrementa_PC(incrementa_PC),
+        .cargaREM(cargaREM),
+        .sel(sel),
+        .selREM(unused),
+        .write(write),
+        .read(read),
+        .UALy(UAL_Y),
+        .UALadd(UAL_ADD),
+        .UALor(UAL_OR),
+        .UALand(UAL_AND),
+        .UALnot(UAL_NOT),
+        .cargaRDM(cargaRDM)
+    );
 
 
 
@@ -67,9 +102,9 @@ module Main (
         .count(PC_out)
     );
 
-    D_Flip_Flop_main AC #(
+    D_Flip_Flop_main #(
         .N(8)
-    ) (
+    ) AC (
         .clk(clk),
         .reset(reset),
         .enable(carga_AC),
@@ -77,9 +112,9 @@ module Main (
         .data_out(saida_AC)
     );
 
-    D_Flip_Flop_main RI #(
+    D_Flip_Flop_main #(
         .N(8)
-    ) (
+    ) RI (
         .clk(clk),
         .reset(reset),
         .enable(carga_RI),
@@ -89,9 +124,9 @@ module Main (
 
 
 
-    D_Flip_Flop_main N #(
+    D_Flip_Flop_main #(
         .N(1)
-    ) (
+    ) N (
         .clk(clk),
         .reset(reset),
         .enable(carga_NZ),
@@ -99,9 +134,9 @@ module Main (
         .data_out(n_to_cntrl)
     );
 
-    D_Flip_Flop_main Z #(
+    D_Flip_Flop_main #(
         .N(1)
-    ) (
+    ) Z (
         .clk(clk),
         .reset(reset),
         .enable(carga_NZ),
