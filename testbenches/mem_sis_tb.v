@@ -11,10 +11,18 @@ module mem_sis_tb;
     reg r_z, write, read, clr, mux_sel1, rem_e, rdm_e;
     reg clk = 1'b1;
     wire [7:0] rdm_out;
+    wire [7:0] test_ram0;
+    wire [7:0] test_ram1; 
+    wire [7:0] test_ram2; 
+    wire [7:0] test_ram3; 
+    wire [7:0] test_ram4; 
+    wire [7:0] test_ram5; 
+    wire [7:0] test_ram6; 
+    wire [7:0] test_ram7; 
 
     mem_sis DUT01(
        rem_d, mux1, r_z, write, read, clr, mux_sel1, rem_e, rdm_e, clk,
-       rdm_out 
+       rdm_out, test_ram0, test_ram1, test_ram2, test_ram3, test_ram4, test_ram5, test_ram6, test_ram7
     );
 
     always #5 clk = ~clk;
@@ -22,8 +30,8 @@ module mem_sis_tb;
     initial begin
         $dumpfile("mem_sis.vcd");
         $dumpvars(0, mem_sis_tb);
-        $display("Time (ns)   | rem_d      | mux1     | r_z | write | read | clr | mux_sel1 | rem_e | rdm_e | clk");
-        $monitor("%9t     | %8b | %8b | %3b | %5b | %4b | %3b | %8b | %5b | %5b | %3b", 
+        $display("Time (ns)   | rem_d    | mux1     | r_z | write | read | clr | mux_sel1 | rem_e | rdm_e | clk");
+        $monitor("%9t   | %8b | %8b | %3b | %5b | %4b | %3b | %8b | %5b | %5b | %3b", 
          $time, rem_d, mux1, r_z, write, read, clr, mux_sel1, rem_e, rdm_e, clk);
 
         rem_d = 8'b00000000;

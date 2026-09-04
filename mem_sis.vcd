@@ -1,5 +1,5 @@
 $date
-	Fri Sep  4 11:14:42 2026
+	Fri Sep  4 11:53:34 2026
 $end
 $version
 	Icarus Verilog
@@ -8,129 +8,161 @@ $timescale
 	1ns
 $end
 $scope module mem_sis_tb $end
-$var wire 8 ! rdm_out [7:0] $end
-$var reg 1 " clk $end
-$var reg 1 # clr $end
-$var reg 8 $ mux1 [7:0] $end
-$var reg 1 % mux_sel1 $end
-$var reg 1 & r_z $end
-$var reg 1 ' rdm_e $end
-$var reg 1 ( read $end
-$var reg 8 ) rem_d [7:0] $end
-$var reg 1 * rem_e $end
-$var reg 1 + write $end
+$var wire 8 ! test_ram7 [7:0] $end
+$var wire 8 " test_ram6 [7:0] $end
+$var wire 8 # test_ram5 [7:0] $end
+$var wire 8 $ test_ram4 [7:0] $end
+$var wire 8 % test_ram3 [7:0] $end
+$var wire 8 & test_ram2 [7:0] $end
+$var wire 8 ' test_ram1 [7:0] $end
+$var wire 8 ( test_ram0 [7:0] $end
+$var wire 8 ) rdm_out [7:0] $end
+$var reg 1 * clk $end
+$var reg 1 + clr $end
+$var reg 8 , mux1 [7:0] $end
+$var reg 1 - mux_sel1 $end
+$var reg 1 . r_z $end
+$var reg 1 / rdm_e $end
+$var reg 1 0 read $end
+$var reg 8 1 rem_d [7:0] $end
+$var reg 1 2 rem_e $end
+$var reg 1 3 write $end
 $scope module DUT01 $end
-$var wire 1 " clk $end
-$var wire 1 # clr $end
-$var wire 8 , mux1 [7:0] $end
-$var wire 1 % mux_sel1 $end
-$var wire 1 & r_z $end
-$var wire 1 ' rdm_e $end
-$var wire 8 - rdm_out [7:0] $end
-$var wire 1 ( read $end
-$var wire 8 . rem_d [7:0] $end
-$var wire 1 * rem_e $end
-$var wire 1 + write $end
-$var wire 8 / w_mem_data [7:0] $end
-$var parameter 2 0 clear_m $end
-$var parameter 2 1 read_m $end
-$var parameter 2 2 wait_m $end
-$var parameter 2 3 write_m $end
-$var reg 2 4 current_state [1:0] $end
-$var reg 8 5 mux_output [7:0] $end
-$var reg 2 6 next_state [1:0] $end
-$var reg 8 7 rdm [7:0] $end
-$var reg 8 8 rem [7:0] $end
+$var wire 1 * clk $end
+$var wire 1 + clr $end
+$var wire 8 4 mux1 [7:0] $end
+$var wire 1 - mux_sel1 $end
+$var wire 1 . r_z $end
+$var wire 1 / rdm_e $end
+$var wire 8 5 rdm_out [7:0] $end
+$var wire 1 0 read $end
+$var wire 8 6 rem_d [7:0] $end
+$var wire 1 2 rem_e $end
+$var wire 8 7 test_ram0 [7:0] $end
+$var wire 8 8 test_ram1 [7:0] $end
+$var wire 8 9 test_ram2 [7:0] $end
+$var wire 8 : test_ram3 [7:0] $end
+$var wire 8 ; test_ram4 [7:0] $end
+$var wire 8 < test_ram5 [7:0] $end
+$var wire 8 = test_ram6 [7:0] $end
+$var wire 8 > test_ram7 [7:0] $end
+$var wire 1 3 write $end
+$var wire 8 ? w_mem_data [7:0] $end
+$var parameter 2 @ clear_m $end
+$var parameter 2 A read_m $end
+$var parameter 2 B wait_m $end
+$var parameter 2 C write_m $end
+$var reg 2 D current_state [1:0] $end
+$var reg 8 E mux_output [7:0] $end
+$var reg 2 F next_state [1:0] $end
+$var reg 8 G rdm [7:0] $end
+$var reg 8 H rem [7:0] $end
 $upscope $end
 $upscope $end
 $enddefinitions $end
 $comment Show the parameter values. $end
 $dumpall
-b1 3
-b0 2
-b10 1
-b11 0
+b1 C
+b0 B
+b10 A
+b11 @
 $end
 #0
 $dumpvars
+bx H
+bx G
+b0 F
+bx E
+bx D
+bx ?
+bx >
+bx =
+bx <
+bx ;
+bx :
+bx 9
 bx 8
 bx 7
 b0 6
 bx 5
-bx 4
-bx /
-b0 .
-bx -
+b0 4
+03
+02
+b0 1
+00
+0/
+0.
+0-
 b0 ,
 0+
-0*
-b0 )
-0(
-0'
-0&
-0%
-b0 $
-0#
-1"
+1*
+bx )
+bx (
+bx '
+bx &
+bx %
+bx $
+bx #
+bx "
 bx !
 $end
 #5
-0"
+0*
 #10
+b0 E
+b0 ?
+b0 H
+b0 )
 b0 5
-b0 /
-b0 8
-b0 !
-b0 -
-b0 7
-b0 4
-1"
-1&
+b0 G
+b0 D
+1*
+1.
 #15
-0"
+0*
 #20
-b1 !
-b1 -
-b1 7
+b1 )
 b1 5
-1"
-1'
-1%
-b1 $
+b1 G
+b1 E
+1*
+1/
+1-
 b1 ,
-0&
-#25
-0"
-#30
 b1 4
-b0 6
-1"
-1+
-0'
+0.
+#25
+0*
+#30
+b1 D
+b0 F
+1*
+13
+0/
 #35
-0"
+0*
 #40
-b0 4
-b0 !
-b0 -
-b0 7
-b0 6
-1"
-0+
-1&
+b0 D
+b0 )
+b0 5
+b0 G
+b0 F
+1*
+03
+1.
 #45
-0"
+0*
 #50
-1"
-0&
+1*
+0.
 #55
-0"
+0*
 #60
-bx /
-b10 4
-bx 5
-b0 6
-1"
-0%
-1'
-1(
+bx ?
+b10 D
+bx E
+b0 F
+1*
+0-
+1/
+10

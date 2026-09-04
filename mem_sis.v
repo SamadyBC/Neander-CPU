@@ -4,7 +4,7 @@ module mem_sis(
         input wire r_z, write, read, clr, mux_sel1, rem_e, rdm_e,
         input wire clk,
         output wire [7:0] rdm_out,
-        output wire [7:0] test_ram1
+        output wire [7:0] test_ram0, test_ram1, test_ram2, test_ram3, test_ram4, test_ram5, test_ram6, test_ram7
     );
 
     //Conexoes entre blocos 
@@ -101,7 +101,13 @@ module mem_sis(
 
     assign rdm_out = rdm;
 
-    assign test_ram1 = mem[0];
-
+    assign test_ram0 = mem[0];
+    assign test_ram1 = mem[1];
+    assign test_ram2 = mem[2];
+    assign test_ram3 = mem[3];
+    assign test_ram4 = mem[4];
+    assign test_ram5 = mem[5];
+    assign test_ram6 = mem[6];
+    assign test_ram7 = mem[7];
 
 endmodule
