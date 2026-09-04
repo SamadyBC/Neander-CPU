@@ -1,15 +1,10 @@
 `timescale 1ns/1ns
-//`include "../mem_sis.v"
 
 module mem_sis_tb;
-//         input wire [7:0] rem_d, mux1,
-//         input wire r_z, write, read, clr, mux_sel1, rem_e, rdm_e,
-//         input wire clk,
-//         output wire [7:0] rdm_out
 
     reg [7:0] rem_d, mux1;
     reg r_z, write, read, clr, mux_sel1, rem_e, rdm_e;
-    reg clk = 1'b1;
+    reg clk = 1'b0;
     wire [7:0] rdm_out;
     wire [7:0] test_ram0;
     wire [7:0] test_ram1; 
@@ -43,26 +38,35 @@ module mem_sis_tb;
         mux_sel1 = 1'b0;
         rem_e = 1'b0;
         rdm_e = 1'b0;
-        #10;
+        #10; //10
         r_z = 1'b1;
-        #10;
+        #10; //20
         r_z = 1'b0;
         mux1 = 8'b00000001;
         mux_sel1 = 1'b1;
         rdm_e = 1'b1;
-        #10;
+        #10; //30
         rdm_e = 1'b0;
         write = 1'b1;
-        #10;
-        r_z = 1'b1;
+        #10; //40
         write = 1'b0;
         #10;
+        r_z = 1'b1;
+        #10; //60
         r_z = 1'b0;
         #10;
+        rem_d = 8'b00000000;
+        #10;
+        rem_e = 1'b1;
+        mux_sel1 = 1'b0;
+        #10;
+        rem_e = 1'b0;
         read = 1'b1;
         rdm_e = 1'b1;
-        mux_sel1 = 1'b0;
-
+        #10;
+        read = 1'b0;
+        #10;
+        
         $finish;
     end
 
