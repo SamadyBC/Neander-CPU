@@ -17,6 +17,29 @@ module Main (
 
 
     wire nop, sta, lda, add, OR, AND, NOT, JMP, jn, jz, hlt;
+    wire sel, to_rem, write, read, selRDM,cargaREM;
+
+
+// Memória
+
+
+    mem_sis mem_main (
+        .rem_d(to_rem),
+        .mux1(saida_AC),
+        .r_z(reset),
+        .write(write),
+        .read(read),
+        .clr(1'b0),
+        .mux_sel1(selRDM),
+        .rem_e(cargaREM),
+        .rdm_e(cargaRDM),
+        .clk(clk),
+        .rdm_out(ALU_input_Y),
+    )
+
+
+
+
 
 
     //Instanciação da ULA
@@ -87,7 +110,12 @@ module Main (
     );
 
     //Área do MUX
-
+    mux mux_main (
+        .sel(sel),
+        .in0(Saida_PC),
+        .in1(ALU_out_input_AC),
+        .out(to_rem)
+    );
 
 
     //Área do decoder
