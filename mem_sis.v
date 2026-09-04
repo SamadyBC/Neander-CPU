@@ -75,6 +75,8 @@ module mem_sis(
                     next_state = read_m;
                 end else if (clr) begin
                     next_state = clear_m;
+                end else begin
+                    next_state = wait_m;
                 end
             end
             write_m:
