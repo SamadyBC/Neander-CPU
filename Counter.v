@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module Counter (
     output reg [2:0] Count,
     input wire Clock, Reset 
