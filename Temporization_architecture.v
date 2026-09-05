@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module Temporization_architecture (
     input wire clk,
     input wire halt, goto_t0,
