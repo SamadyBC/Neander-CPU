@@ -313,8 +313,7 @@ module Control_Block (
 
             state_LDA5: begin 
                 carga_AC = 1'b1;
-                carga_NZ = 1'b1; 
-                UALy = 1'b1; 
+                carga_NZ = 1'b1;  
                 next_state = search1; 
             end
 
@@ -328,7 +327,6 @@ module Control_Block (
                 read = 1'b1;
                 incrementa_PC = 1'b1;
                 cargaRDM = 1'b1;
-                UALy = 1'b1;
                 next_state = state_ADD3;  
             end
 
