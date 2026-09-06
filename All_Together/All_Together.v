@@ -227,7 +227,7 @@ module Control_Block (
     parameter [3:0] search1 = 4'b0000, 
                     search2 = 4'b0001, 
                     search3 = 4'b0010, 
-                    decode_state = 4'b0011, // ESTADO ADICIONADO PARA ESPERAR O RI
+                    decode_state = 4'b0011,
                     state_LDA = 4'b0100, 
                     state_LDA2 = 4'b0101, 
                     state_LDA3 = 4'b0110, 
@@ -238,121 +238,92 @@ module Control_Block (
                     
     reg [3:0] state, next_state;
 
-
-    always @(posedge clk) begin
+    always @(posedge clk or posedge rst) begin
         if (rst) begin
             state <= search1;
         end else begin
             state <= next_state;
         end
     end
-
     
-    always @ (posedge clk) begin
+    always @ (*) begin
+        cargaREM = 1'b0; cargaRI = 1'b0; gotot0 = 1'b0; selRDM = 1'b0; 
+        carga_AC = 1'b0; carga_NZ = 1'b0; carga_PC = 1'b0; incrementa_PC = 1'b0; 
+        sel = 1'b0; selREM = 1'b0; write = 1'b0; read = 1'b0; 
+        UALy = 1'b1; // Padrão da ULA é apenas transitar o dado
+        UALadd = 1'b0; UALor = 1'b0; UALand = 1'b0; UALnot = 1'b0; cargaRDM = 1'b0; 
+
+        next_state = state; 
+
         case(state)
             search1: begin 
-                cargaREM <= 1'b1; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; 
-                sel <= 1'b1; 
-                selREM <= 1'b0; write <= 1'b0; read <= 1'b0; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-                next_state <= search2;
+                cargaREM = 1'b1; 
+                sel = 1'b1; 
+                next_state = search2;
             end
             
-            search2:begin 
-                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b1; sel <= 1'b0; selREM <= 1'b0; 
-                write <= 1'b0; read <= 1'b1; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
-                next_state <= search3; 
+            search2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1; 
+                next_state = search3; 
             end
             
-            search3:begin 
-                cargaREM <= 1'b0; cargaRI <= 1'b1; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0;
-                write <= 1'b0; read <= 1'b0; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0;
-                
-                next_state <= decode_state; // VAI PARA O NOVO ESTADO DE ESPERA
+            search3: begin 
+                cargaRI = 1'b1; 
+                next_state = decode_state; 
             end
 
-            decode_state: begin // NOVO ESTADO AQUI
-                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0;
-                write <= 1'b0; read <= 1'b0; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0;
-                
-                // AGORA O REGISTRADOR 'RI' JÁ RECEBEU A INSTRUÇÃO E PODEMOS COMPARAR!
-                if(NOP)
-                    next_state <= search1;
-                else if(LDA)
-                    next_state <= state_LDA;
-                else if(ADD)
-                    next_state <= state_ADD;
-                else 
-                    next_state <= search1;
+            decode_state: begin 
+                if(NOP) next_state = search1;
+                else if(LDA) next_state = state_LDA;
+                else if(ADD) next_state = state_ADD;
+                else next_state = search1;
             end
             
             // --- INÍCIO DO CICLO LDA (5 Estados) ---
             state_LDA: begin 
-                cargaREM <= 1'b1; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; 
-                sel <= 1'b1; 
-                selREM <= 1'b0; write <= 1'b0; read <= 1'b0; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-                next_state <= state_LDA2;
+                cargaREM = 1'b1; 
+                sel = 1'b1; 
+                next_state = state_LDA2;
             end
             
             state_LDA2: begin 
-                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b1; sel <= 1'b0; selREM <= 1'b0; 
-                write <= 1'b0; read <= 1'b1; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
-                next_state <= state_LDA3;               
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1; 
+                next_state = state_LDA3;                
             end
 
             state_LDA3: begin 
-                cargaREM <= 1'b1; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; 
-                sel <= 1'b0; 
-                selREM <= 1'b0; write <= 1'b0; read <= 1'b0; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-                next_state <= state_LDA4;               
+                cargaREM = 1'b1; 
+                sel = 1'b0;  
+                next_state = state_LDA4;                
             end
             
             state_LDA4: begin 
-                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
-                write <= 1'b0; read <= 1'b1; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
-                next_state <= state_LDA5;               
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_LDA5;                
             end
 
             state_LDA5: begin 
-                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; 
-                carga_AC <= 1'b1; // ACUMULADOR GUARDA O VALOR NESTE CICLO!
-                carga_NZ <= 1'b1; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
-                write <= 1'b0; read <= 1'b0; 
-                UALy <= 1'b1; 
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-                next_state <= search1; 
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1; 
+                UALy = 1'b1; 
+                next_state = search1; 
             end
 
             state_ADD: begin 
-                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b1; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
-                write <= 1'b0; read <= 1'b0; 
-                UALy <= 1'b1; // PREVINE 'XX' NA ULA
-                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-                next_state <= search1;  
+                carga_AC = 1'b1; 
+                next_state = search1;  
             end
 
             default: begin
-                next_state <= search1;
+                next_state = search1;
             end
-
         endcase
     end
-
 endmodule
 
 module Counter (
