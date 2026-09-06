@@ -224,19 +224,23 @@ module Control_Block (
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
-    parameter [3:0] search1 = 4'b0000, 
-                    search2 = 4'b0001, 
-                    search3 = 4'b0010, 
-                    decode_state = 4'b0011,
-                    state_LDA = 4'b0100, 
-                    state_LDA2 = 4'b0101, 
-                    state_LDA3 = 4'b0110, 
-                    state_LDA4 = 4'b0111, 
-                    state_LDA5 = 4'b1000, 
-                    state_ADD = 4'b1001, 
-                    state_NOP = 4'b1111;
+    parameter [4:0] search1 = 4'b00000, 
+                    search2 = 4'b00001, 
+                    search3 = 4'b00010, 
+                    decode_state = 4'b00011,
+                    state_LDA = 4'b00100, 
+                    state_LDA2 = 4'b00101, 
+                    state_LDA3 = 4'b00110, 
+                    state_LDA4 = 4'b00111, 
+                    state_LDA5 = 4'b01000, 
+                    state_ADD = 4'b01001,
+                    state_ADD2 = 4'b01010,
+                    state_ADD3 = 4'b01011,
+                    state_ADD4 = 4'b01100,
+                    state_ADD5 = 4'b01101, 
+                    state_NOP = 4'b10001;
                     
-    reg [3:0] state, next_state;
+    reg [4:0] state, next_state;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -315,7 +319,36 @@ module Control_Block (
             end
 
             state_ADD: begin 
-                carga_AC = 1'b1; 
+                cargaREM = 1'b1;
+                sel = 1'b1;
+                next_state = state_ADD2;  
+            end
+
+            state_ADD2: begin 
+                read = 1'b1;
+                incrementa_PC = 1'b1;
+                cargaRDM = 1'b1;
+                UALy = 1'b1;
+                next_state = state_ADD3;  
+            end
+
+            state_ADD3: begin 
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_ADD4;  
+            end
+
+            state_ADD4: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1;
+                next_state = state_ADD5;  
+            end
+
+            state_ADD5: begin 
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALadd = 1'b1; 
                 next_state = search1;  
             end
 
@@ -413,13 +446,13 @@ module mem_sis(
     
     initial mem [0] = 8'h20; 
     initial mem [1] = 8'h06;
-    initial mem [2] = 8'h05;
-    initial mem [3] = 8'h09;
-    initial mem [4] = 8'h0A;
-    initial mem [5] = 8'h0B;
-    initial mem [6] = 8'h11;
-    initial mem [7] = 8'h12;
-    initial mem [8] = 8'h13;
+  	initial mem [2] = 8'h30;
+  	initial mem [3] = 8'h07;
+  	initial mem [4] = 8'h30;
+    initial mem [5] = 8'h08;
+  	initial mem [6] = 8'h02;
+  	initial mem [7] = 8'h03;
+    initial mem [8] = 8'h0C;
 
     //Constantes para os estados 
     parameter wait_m = 2'b00,
