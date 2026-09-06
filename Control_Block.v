@@ -17,13 +17,6 @@ module Control_Block (
         end
     end
 
-    // always @(*) begin
-    //     if (NOP)
-    //     state <= search1 
-    //     next_state <= search2;
-    // end
-
-
     
     always @ (posedge clk) begin
         case(state)
@@ -35,11 +28,11 @@ module Control_Block (
             search2:begin cargaREM <= 1'b0;
             cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b1; sel <= 1'b0; selREM <= 1'b0; 
             write <= 1'b0; read <= 1'b1; UALy <= 1'b0; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
-                if(state_NOP)
+                if(NOP)
                  next_state <= search1;
-                else if(state_LDA)
+                else if(LDA)
                         next_state <= state_LDA;
-                    else if(state_ADD)
+                    else if(ADD)
                         next_state <= state_ADD;
             end
             search3:begin cargaREM <= 1'b0;
