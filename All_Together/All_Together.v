@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module Main (
     input wire clk, reset,
     output wire [7:0] test
@@ -84,7 +86,7 @@ module Main (
     ALU ALU_main (
         .x(w_saida_ac),
         .y(w_mem_output),
-        .op_alu({ALU_Y, ALU_NOT, ALU_OR, ALU_AND, ALU_ADD}),
+        .op_alu({w_ual_y, w_ual_not, w_ual_or, w_ual_and, w_ual_add}), 
         .out(ALU_out_input_AC),
         .n(w_ula_n),
         .z(w_ula_z)
@@ -222,7 +224,18 @@ module Control_Block (
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
-    parameter [3:0] search1 = 4'b0000, search2 = 4'b0001, search3 = 4'b0010, state_LDA = 4'b0100, state_LDA2 = 4'b0101, state_LDA3 = 4'b0110, state_ADD = 4'b0111, state_NOP = 4'b1111;
+    parameter [3:0] search1 = 4'b0000, 
+                    search2 = 4'b0001, 
+                    search3 = 4'b0010, 
+                    decode_state = 4'b0011, // ESTADO ADICIONADO PARA ESPERAR O RI
+                    state_LDA = 4'b0100, 
+                    state_LDA2 = 4'b0101, 
+                    state_LDA3 = 4'b0110, 
+                    state_LDA4 = 4'b0111, 
+                    state_LDA5 = 4'b1000, 
+                    state_ADD = 4'b1001, 
+                    state_NOP = 4'b1111;
+                    
     reg [3:0] state, next_state;
 
 
@@ -237,59 +250,108 @@ module Control_Block (
     
     always @ (posedge clk) begin
         case(state)
-            search1: begin cargaREM <= 1'b1;
-            cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
-            write <= 1'b0; read <= 1'b0; UALy <= 1'b0; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-            next_state <= search2;
-            end
-            search2:begin cargaREM <= 1'b0;
-            cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b1; sel <= 1'b0; selREM <= 1'b0; 
-            write <= 1'b0; read <= 1'b1; UALy <= 1'b0; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
-                if(state_NOP)
-                 next_state <= search1;
-                else if(state_LDA)
-                        next_state <= state_LDA;
-                    else if(state_ADD)
-                        next_state <= state_ADD;
-            end
-            search3:begin cargaREM <= 1'b0;
-                cargaRI <= 1'b1; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0;
-                write <= 1'b0; read <= 1'b0; UALy <= 1'b0; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0;
-                next_state <= search1;
+            search1: begin 
+                cargaREM <= 1'b1; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; 
+                sel <= 1'b1; 
+                selREM <= 1'b0; write <= 1'b0; read <= 1'b0; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
+                next_state <= search2;
             end
             
-            state_LDA: begin cargaREM <= 1'b1;
-                cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b1; selREM <= 1'b0; 
-                write <= 1'b0; read <= 1'b0; UALy <= 1'b0; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
+            search2:begin 
+                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b1; sel <= 1'b0; selREM <= 1'b0; 
+                write <= 1'b0; read <= 1'b1; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
+                next_state <= search3; 
+            end
+            
+            search3:begin 
+                cargaREM <= 1'b0; cargaRI <= 1'b1; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0;
+                write <= 1'b0; read <= 1'b0; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0;
+                
+                next_state <= decode_state; // VAI PARA O NOVO ESTADO DE ESPERA
+            end
+
+            decode_state: begin // NOVO ESTADO AQUI
+                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0;
+                write <= 1'b0; read <= 1'b0; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0;
+                
+                // AGORA O REGISTRADOR 'RI' JÁ RECEBEU A INSTRUÇÃO E PODEMOS COMPARAR!
+                if(NOP)
+                    next_state <= search1;
+                else if(LDA)
+                    next_state <= state_LDA;
+                else if(ADD)
+                    next_state <= state_ADD;
+                else 
+                    next_state <= search1;
+            end
+            
+            // --- INÍCIO DO CICLO LDA (5 Estados) ---
+            state_LDA: begin 
+                cargaREM <= 1'b1; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; 
+                sel <= 1'b1; 
+                selREM <= 1'b0; write <= 1'b0; read <= 1'b0; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
                 next_state <= state_LDA2;
             end
             
-            state_LDA2: begin cargaREM <= 1'b0;
-            cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
-            write <= 1'b0; read <= 1'b1; UALy <= 1'b0; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
-            next_state <= state_LDA3;               
+            state_LDA2: begin 
+                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b1; sel <= 1'b0; selREM <= 1'b0; 
+                write <= 1'b0; read <= 1'b1; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
+                next_state <= state_LDA3;               
             end
 
-            state_LDA3: begin cargaREM <= 1'b0;
-            cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b1; carga_NZ <= 1'b1; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
-            write <= 1'b0; read <= 1'b0; UALy <= 1'b1; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-            next_state <= search1;               
+            state_LDA3: begin 
+                cargaREM <= 1'b1; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; 
+                sel <= 1'b0; 
+                selREM <= 1'b0; write <= 1'b0; read <= 1'b0; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
+                next_state <= state_LDA4;               
             end
-
-            state_ADD: begin cargaREM <= 1'b0;
-            cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b1; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
-            write <= 1'b0; read <= 1'b0; UALy <= 1'b0; UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
-            next_state <= search1;  
-            end
-
             
+            state_LDA4: begin 
+                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b0; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
+                write <= 1'b0; read <= 1'b1; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b1; 
+                next_state <= state_LDA5;               
+            end
+
+            state_LDA5: begin 
+                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; 
+                carga_AC <= 1'b1; // ACUMULADOR GUARDA O VALOR NESTE CICLO!
+                carga_NZ <= 1'b1; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
+                write <= 1'b0; read <= 1'b0; 
+                UALy <= 1'b1; 
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
+                next_state <= search1; 
+            end
+
+            state_ADD: begin 
+                cargaREM <= 1'b0; cargaRI <= 1'b0; gotot0 <= 1'b0; selRDM <= 1'b0; carga_AC <= 1'b1; carga_NZ <= 1'b0; carga_PC <= 1'b0; incrementa_PC <= 1'b0; sel <= 1'b0; selREM <= 1'b0; 
+                write <= 1'b0; read <= 1'b0; 
+                UALy <= 1'b1; // PREVINE 'XX' NA ULA
+                UALadd <= 1'b0; UALor <= 1'b0; UALand <= 1'b0; UALnot <= 1'b0; cargaRDM <= 1'b0; 
+                next_state <= search1;  
+            end
+
+            default: begin
+                next_state <= search1;
+            end
 
         endcase
-
-
     end
-
-
 
 endmodule
 
@@ -380,7 +442,13 @@ module mem_sis(
     
     initial mem [0] = 8'h20; 
     initial mem [1] = 8'h06;
+    initial mem [2] = 8'h05;
+    initial mem [3] = 8'h09;
+    initial mem [4] = 8'h0A;
+    initial mem [5] = 8'h0B;
     initial mem [6] = 8'h11;
+    initial mem [7] = 8'h12;
+    initial mem [8] = 8'h13;
 
     //Constantes para os estados 
     parameter wait_m = 2'b00,
@@ -456,14 +524,13 @@ module mem_sis(
     //Logica Combinacional - Independente do Clock
     always @ (*) begin
         case(mux_sel1)
-            1'b0: mux_output = w_mem_data;
+            1'b0: mux_output = mem[rem];  // Lê DIRETO da matriz de RAM de forma instantânea
             1'b1: mux_output = mux1;
             default: mux_output = 8'h00;
         endcase
     end
 
-    assign w_mem_data = current_state  == read_m ? mem[rem] : 8'h00;
-
+    // REMOVA a linha "assign w_mem_data = mem[rem];" que estava solta aqui
     assign rdm_out = rdm;
 
 
