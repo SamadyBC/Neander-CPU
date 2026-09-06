@@ -17,13 +17,6 @@ module Control_Block (
         end
     end
 
-    // always @(*) begin
-    //     if (NOP)
-    //     state <= search1 
-    //     next_state <= search2;
-    // end
-
-
     
     always @ (posedge clk) begin
         case(state)
