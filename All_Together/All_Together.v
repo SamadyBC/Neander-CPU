@@ -151,8 +151,8 @@ module Main (
     //Área do MUX
     Multiplexer_8bits mux_main (
         .sel(w_sel),
-        .in0(w_mem_output),
-        .in1(w_pc_to_mux), //Aqui seria o wire de conexao do PC para o mux
+        .in0(w_pc_to_mux), 
+        .in1(w_mem_output), //Aqui seria o wire de conexao do PC para o mux
         .out(w_to_rem)
     );
 
@@ -224,21 +224,26 @@ module Control_Block (
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
-    parameter [4:0] search1 = 4'b00000, 
-                    search2 = 4'b00001, 
-                    search3 = 4'b00010, 
-                    decode_state = 4'b00011,
-                    state_LDA = 4'b00100, 
-                    state_LDA2 = 4'b00101, 
-                    state_LDA3 = 4'b00110, 
-                    state_LDA4 = 4'b00111, 
-                    state_LDA5 = 4'b01000, 
-                    state_ADD = 4'b01001,
-                    state_ADD2 = 4'b01010,
-                    state_ADD3 = 4'b01011,
-                    state_ADD4 = 4'b01100,
-                    state_ADD5 = 4'b01101, 
-                    state_NOP = 4'b10001;
+    parameter [4:0] search1 = 5'b00000, 
+                    search2 = 5'b00001, 
+                    search3 = 5'b00010, 
+                    decode_state = 5'b00011,
+                    state_LDA = 5'b00100, 
+                    state_LDA2 = 5'b00101, 
+                    state_LDA3 = 5'b00110, 
+                    state_LDA4 = 5'b00111, 
+                    state_LDA5 = 5'b01000, 
+                    state_ADD = 5'b01001,
+                    state_ADD2 = 5'b01010,
+                    state_ADD3 = 5'b01011,
+                    state_ADD4 = 5'b01100,
+                    state_ADD5 = 5'b01101,
+                    state_STA = 5'b01110,
+                    state_STA2 = 5'b01111,
+                    state_STA3 = 5'b10000,
+                    state_STA4 = 5'b10001,
+                    state_STA5 = 5'b10010,
+                    state_NOP = 5'b10001;
                     
     reg [4:0] state, next_state;
 
@@ -262,7 +267,7 @@ module Control_Block (
         case(state)
             search1: begin 
                 cargaREM = 1'b1; 
-                sel = 1'b1; 
+                sel = 1'b0; 
                 next_state = search2;
             end
             
@@ -282,13 +287,14 @@ module Control_Block (
                 if(NOP) next_state = search1;
                 else if(LDA) next_state = state_LDA;
                 else if(ADD) next_state = state_ADD;
+                else if(STA) next_state = state_STA;
                 else next_state = search1;
             end
             
             // --- INÍCIO DO CICLO LDA (5 Estados) ---
             state_LDA: begin 
                 cargaREM = 1'b1; 
-                sel = 1'b1; 
+                sel = 1'b0;
                 next_state = state_LDA2;
             end
             
@@ -301,7 +307,7 @@ module Control_Block (
 
             state_LDA3: begin 
                 cargaREM = 1'b1; 
-                sel = 1'b0;  
+                sel = 1'b1;  
                 next_state = state_LDA4;                
             end
             
@@ -319,7 +325,7 @@ module Control_Block (
 
             state_ADD: begin 
                 cargaREM = 1'b1;
-                sel = 1'b1;
+                sel = 1'b0; 
                 next_state = state_ADD2;  
             end
 
@@ -332,7 +338,7 @@ module Control_Block (
 
             state_ADD3: begin 
                 cargaREM = 1'b1;
-                sel = 1'b0;
+                sel = 1'b1;
                 next_state = state_ADD4;  
             end
 
@@ -346,9 +352,42 @@ module Control_Block (
                 carga_AC = 1'b1;
                 carga_NZ = 1'b1;
                 UALy = 1'b0;
-                UALadd = 1'b1; 
+                UALadd = 1'b1;
+                gotot0 = 1'b1;
                 next_state = search1;  
             end
+
+            state_STA: begin
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_STA2;  
+            end
+
+            state_STA2: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1; 
+                next_state = state_STA3;  
+            end
+
+            state_STA3: begin
+                cargaREM = 1'b1;
+                sel = 1'b1; 
+                next_state = state_STA4; 
+            end
+
+            state_STA4: begin
+                cargaRDM = 1'b1; 
+                selRDM = 1'b1; 
+                next_state = state_STA5; 
+            end
+
+            state_STA5: begin
+                write = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+        
 
             default: begin
                 next_state = search1;
@@ -427,7 +466,7 @@ module mem_sis(
         input wire [7:0] rem_d, mux1,
         input wire r_z, write, read, clr, mux_sel1, rem_e, rdm_e,
         input wire clk,
-        output wire [7:0] rdm_out
+        output wire [7:0] rdm_out, debug_output
     );
 
     //Conexoes entre blocos 
@@ -446,10 +485,10 @@ module mem_sis(
     initial mem [1] = 8'h06;
   	initial mem [2] = 8'h30;
   	initial mem [3] = 8'h07;
-  	initial mem [4] = 8'h30;
+  	initial mem [4] = 8'h10;
     initial mem [5] = 8'h08;
   	initial mem [6] = 8'h02;
-  	initial mem [7] = 8'h03;
+  	initial mem [7] = 8'h02;
     initial mem [8] = 8'h0C;
 
     //Constantes para os estados 
@@ -526,14 +565,14 @@ module mem_sis(
     //Logica Combinacional - Independente do Clock
     always @ (*) begin
         case(mux_sel1)
-            1'b0: mux_output = mem[rem];  // Lê DIRETO da matriz de RAM de forma instantânea
+            1'b0: mux_output = mem[rem];
             1'b1: mux_output = mux1;
             default: mux_output = 8'h00;
         endcase
     end
 
-    // REMOVA a linha "assign w_mem_data = mem[rem];" que estava solta aqui
     assign rdm_out = rdm;
+    assign debug_output = mem[8];
 
 
 endmodule
