@@ -50,6 +50,7 @@ module Main (
         .OR(w_or),
         .AND(w_and),
         .SUB(w_sub),
+        .NOT(w_not),
         .JMP(w_jmp),
         .JN(w_jn),
         .JZ(w_jz),
@@ -220,7 +221,7 @@ endmodule
 
 
 module Control_Block (
-    input wire NOP, STA, LDA, ADD, OR, AND, SUB, JMP, JN, JZ, N, SZ, clk, hlt, rst,
+    input wire NOP, STA, LDA, ADD, OR, AND, SUB, NOT, JMP, JN, JZ, N, SZ, clk, hlt, rst,
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
@@ -243,7 +244,18 @@ module Control_Block (
                     state_STA3 = 5'b10000,
                     state_STA4 = 5'b10001,
                     state_STA5 = 5'b10010,
-                    state_NOP = 5'b10001;
+                    state_OR = 5'b10011,
+                    state_OR2 = 5'b10100,
+                    state_OR3 = 5'b10101,
+                    state_OR4 = 5'b10110,
+                    state_OR5 = 5'b10111,
+                    state_AND = 5'b11000,
+                    state_AND2 = 5'b11001,
+                    state_AND3 = 5'b11010,
+                    state_AND4 = 5'b11011,
+                    state_AND5 = 5'b11100,
+                    state_NOT = 5'b11111;
+                    //state_NOP = 5'b10001;
                     
     reg [4:0] state, next_state;
 
@@ -288,6 +300,9 @@ module Control_Block (
                 else if(LDA) next_state = state_LDA;
                 else if(ADD) next_state = state_ADD;
                 else if(STA) next_state = state_STA;
+                else if(OR) next_state = state_OR;
+                else if(AND) next_state = state_AND;
+                else if(NOT) next_state = state_NOT;
                 else next_state = search1;
             end
             
@@ -384,6 +399,83 @@ module Control_Block (
 
             state_STA5: begin
                 write = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_OR: begin
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_OR2;
+            end
+
+            state_OR2: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1;
+                next_state = state_OR3;
+            end
+
+            state_OR3: begin
+                cargaREM = 1'b1;
+                selRDM = 1'b1; 
+                next_state = state_OR4;
+            end
+
+            state_OR4: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_OR5;
+            end
+
+            state_OR5: begin
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALor = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_AND: begin
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_AND2;
+            end
+
+            state_AND2: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1;
+                next_state = state_AND3;
+            end
+
+            state_AND3: begin
+                cargaREM = 1'b1;
+                selRDM = 1'b1; 
+                next_state = state_AND4;
+            end
+
+            state_AND4: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_AND5;
+            end
+
+            state_AND5: begin
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALand = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_NOT: begin
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALnot = 1'b1;
                 gotot0 = 1'b1;
                 next_state = search1;
             end
@@ -485,11 +577,11 @@ module mem_sis(
     initial mem [1] = 8'h06;
   	initial mem [2] = 8'h30;
   	initial mem [3] = 8'h07;
-  	initial mem [4] = 8'h10;
+  	initial mem [4] = 8'h60;
     initial mem [5] = 8'h08;
   	initial mem [6] = 8'h02;
   	initial mem [7] = 8'h02;
-    initial mem [8] = 8'h0C;
+    initial mem [8] = 8'h02;
 
     //Constantes para os estados 
     parameter wait_m = 2'b00,
