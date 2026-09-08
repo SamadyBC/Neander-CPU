@@ -23,7 +23,7 @@ The Neander architecture is a classic 8-bit accumulator-based computer model. Th
 
 Key characteristics:
 - **Data & Address Width**: 8-bit data bus and 8-bit memory address space (256 bytes memory capacity).
-- **Architecture Type**: Accumulator-based CPU.
+- **Architecture Type**: Accumulator-based CPU, Von-Neumman.
 - **Condition Flags**: `N` (Negative) and `Z` (Zero).
 - **Execution Scheme**: Micro-sequenced Finite State Machine controlling instruction fetch, decode, and execution cycles.
 
@@ -47,9 +47,6 @@ Key characteristics:
 │   └── Temporization_architecture.v # Timing signal generator
 ├── All_Together/                   # Single-file combined design & testbenches
 │   ├── All_Together.v             # Full CPU design consolidated in one file
-│   ├── tb_neander.v               # Top-level Neander processor testbench
-│   ├── tb_neander2.v              # Secondary testbench
-│   └── tb_neander3.v              # Extended instruction set testbench
 ├── testbenches/                    # Independent module testbenches
 │   ├── mem_sis_tb.v               # Memory subsystem testbench
 │   └── testbenchmain.v            # Main CPU testbench
@@ -108,8 +105,8 @@ The Control Block FSM (`Control_Block.v`) manages instruction fetch (`search1` -
 ### 2. Memory System FSM
 The Memory System FSM (`mem_sis.v`) handles RAM access synchronization and memory operations (`wait_m`, `read_m`, `write_m`, and `clear_m`).
 
-<!-- PLACEHOLDER FOR MEMORY SYSTEM FSM IMAGE -->
-![Memory System FSM](docs/images/memory_system_fsm.png)
+<img width="6429" height="1682" alt="MemmorySystem_FSM-2026-09-08-170951" src="https://github.com/user-attachments/assets/8844d9e2-3093-4028-87cb-673571ea8f6b" />
+
 
 ---
 
@@ -129,3 +126,4 @@ The Memory System FSM (`mem_sis.v`) handles RAM access synchronization and memor
 Testbenches and VCD waveform output files are provided for verifying design behavior:
 - Run testbenches using Verilog simulators like Icarus Verilog (`iverilog`) or ModelSim.
 - View `.vcd` files (e.g., `neander.vcd`, `mem_sis.vcd`, `dump.vcd`) using **GTKWave**.
+
