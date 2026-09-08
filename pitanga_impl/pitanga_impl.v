@@ -1,0 +1,917 @@
+module Main (
+    input wire clk, reset,
+    output wire [7:0] test
+);
+
+    wire incrementa_PC; 
+    wire [7:0] w_mem_output, w_saida_ac; 
+    wire [7:0] w_pc_to_mux;
+    wire ALU_Y, ALU_NOT, ALU_OR, ALU_AND, ALU_ADD;
+    wire [7:0] ALU_out_input_AC;
+    wire [7:0] to_decoder;
+    wire n_to_cntrl, z_to_cntrl;
+
+
+    // Wires de transmissao de sinais do decodificador de instrucoes para bloco de controle
+    wire w_nop, w_sta, w_lda, w_add, w_or, w_and, w_not, w_jmp, w_jn, w_jz, w_hlt;
+    // Wires de transmissao de sinais de saida do bloco de controle para ULA, Registradores, Memoria
+    wire w_carga_pc, w_ual_y, w_ual_add, w_ual_or, w_ual_and, w_ual_not, w_ula_n, w_ula_z;
+    wire w_sel, w_write, w_read, w_sel_rdm, w_carga_rem, w_sub, w_carga_rdm, w_carga_ac, w_carga_ri, w_carga_nz;
+    // Wire conexao saida multiplexador que encaminha dados para o registradore de enderecos da memoria
+    wire [7:0] w_to_rem;
+
+    wire unused;
+    assign test = w_saida_ac;
+
+// Memória
+
+
+    mem_sis mem_main (
+        .rem_d(w_to_rem),
+        .mux1(w_saida_ac),
+        .r_z(reset),
+        .write(w_write),
+        .read(w_read),
+        .clr(1'b0),
+        .mux_sel1(w_sel_rdm),
+        .rem_e(w_carga_rem),
+        .rdm_e(w_carga_rdm),
+        .clk(clk),
+        .rdm_out(w_mem_output)
+    );
+
+    Control_Block Control (
+        .NOP(w_nop),
+        .STA(w_sta),
+        .LDA(w_lda),
+        .ADD(w_add),
+        .OR(w_or),
+        .AND(w_and),
+        .SUB(w_sub),
+        .NOT(w_not),
+        .JMP(w_jmp),
+        .JN(w_jn),
+        .JZ(w_jz),
+        .N(n_to_cntrl),
+        .SZ(z_to_cntrl),
+        .clk(clk),
+        .hlt(w_hlt),
+        .rst(reset),
+        .cargaRI(w_carga_ri),
+        .gotot0(unused),
+        .selRDM(w_sel_rdm),
+        .carga_AC(w_carga_ac),
+        .carga_NZ(w_carga_nz),
+        .carga_PC(w_carga_pc),
+        .incrementa_PC(incrementa_PC),
+        .cargaREM(w_carga_rem),
+        .sel(w_sel),
+        .selREM(unused),
+        .write(w_write),
+        .read(w_read),
+        .UALy(w_ual_y),
+        .UALadd(w_ual_add),
+        .UALor(w_ual_or),
+        .UALand(w_ual_and),
+        .UALnot(w_ual_not),
+        .cargaRDM(w_carga_rdm)
+    );
+
+
+
+
+    //Instanciação da ULA
+
+    ALU ALU_main (
+        .x(w_saida_ac),
+        .y(w_mem_output),
+        .op_alu({w_ual_y, w_ual_not, w_ual_or, w_ual_and, w_ual_add}), 
+        .out(ALU_out_input_AC),
+        .n(w_ula_n),
+        .z(w_ula_z)
+    );
+
+
+
+
+    // Area dos Registradores 
+    //Aqui é um contador trocar
+    PC PC_main (
+        .clk(clk),
+        .reset(reset),
+        .enable(incrementa_PC),
+        .Load(w_carga_pc),
+        .count_in(w_mem_output),
+        .count(w_pc_to_mux)
+    );
+
+    D_Flip_Flop_main #(
+        .N(8)
+    ) AC (
+        .clk(clk),
+        .reset(reset),
+        .enable(w_carga_ac),
+        .data(ALU_out_input_AC),
+        .data_out(w_saida_ac)
+    );
+
+    D_Flip_Flop_main #(
+        .N(8)
+    ) RI (
+        .clk(clk),
+        .reset(reset),
+        .enable(w_carga_ri),
+        .data(w_mem_output),
+        .data_out(to_decoder)
+    );
+
+
+
+    D_Flip_Flop_main #(
+        .N(1)
+    ) N (
+        .clk(clk),
+        .reset(reset),
+        .enable(w_carga_nz),
+        .data(w_ula_n),
+        .data_out(n_to_cntrl)
+    );
+
+    D_Flip_Flop_main #(
+        .N(1)
+    ) Z (
+        .clk(clk),
+        .reset(reset),
+        .enable(w_carga_nz),
+        .data(w_ula_z),
+        .data_out(z_to_cntrl)
+    );
+
+    //Área do MUX
+    Multiplexer_8bits mux_main (
+        .sel(w_sel),
+        .in0(w_pc_to_mux), 
+        .in1(w_mem_output), //Aqui seria o wire de conexao do PC para o mux
+        .out(w_to_rem)
+    );
+
+
+    //Área do decoder
+
+    decoder decoder_main (
+        .Op(to_decoder[7:4]),
+        .nop(w_nop),
+        .sta(w_sta),
+        .lda(w_lda),
+        .add(w_add),
+        .OR(w_or),
+        .AND(w_and),
+        .NOT(w_not),
+        .JMP(w_jmp),
+        .jn(w_jn),
+        .jz(w_jz),
+        .hlt(w_hlt),
+        .unused1(unused),
+        .unused2(unused),
+        .unused3(unused),
+        .unused4(unused),
+        .unused5(unused)
+    );
+
+
+
+
+
+
+
+
+
+endmodule
+
+
+module ALU (
+    input wire [7:0] x, y,
+    input wire [4:0] op_alu,
+    output reg [7:0] out,
+    output wire n, z
+);
+
+    reg [7:0] sig1, sig2, sig3, sig4, sig5;
+//    OPULA foi colocado como 5 bits, sendo do mais significativo até o menos significativo a ordem: Y, NOT, OR, AND, ADD
+    always @ (*) begin
+        case(op_alu)
+            5'b00001: out = sig1;
+            5'b00100: out = sig2;
+            5'b00010: out = sig3;
+            5'b01000: out = sig4;
+            5'b10000: out = sig5;
+            default: out = sig5;
+        endcase
+    end
+
+    always @ (*) begin
+        sig1 = x + y;
+        sig2 = x | y;
+        sig3 = x & y;
+        sig4 = ~x;
+        sig5 = y;
+    end
+
+    assign z = ~(out[7] | out[6] | out[5] | out[4] | out[3] | out[2] | out[1] | out[0]); 
+    assign n = out[7];  
+
+endmodule
+
+
+module Control_Block (
+    input wire NOP, STA, LDA, ADD, OR, AND, SUB, NOT, JMP, JN, JZ, N, SZ, clk, hlt, rst,
+    output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
+);
+
+    parameter [5:0]
+                    search1 = 6'd0,
+                    search2 = 6'd1,
+                    search3 = 6'd2, 
+                    decode_state = 6'd3,
+                    state_LDA = 6'd4,
+                    state_LDA2 = 6'd5, 
+                    state_LDA3 = 6'd6, 
+                    state_LDA4 = 6'd7, 
+                    state_LDA5 = 6'd8,
+                    state_ADD = 6'd9, 
+                    state_ADD2 = 6'd10, 
+                    state_ADD3 = 6'd11, 
+                    state_ADD4 = 6'd12, 
+                    state_ADD5 = 6'd13,
+                    state_STA = 6'd14, 
+                    state_STA2 = 6'd15, 
+                    state_STA3 = 6'd16, 
+                    state_STA4 = 6'd17, 
+                    state_STA5 = 6'd18,
+                    state_OR = 6'd19, 
+                    state_OR2 = 6'd20, 
+                    state_OR3 = 6'd21, 
+                    state_OR4 = 6'd22, 
+                    state_OR5 = 6'd23,
+                    state_AND = 6'd24, 
+                    state_AND2 = 6'd25, 
+                    state_AND3 = 6'd26, 
+                    state_AND4 = 6'd27, 
+                    state_AND5 = 6'd28,
+                    state_NOT = 6'd29,
+                    state_JMP = 6'd30, 
+                    state_JMP2 = 6'd31, 
+                    state_JMP3 = 6'd32,
+                    state_JN = 6'd33, 
+                    state_JN2 = 6'd34, 
+                    state_JN3 = 6'd35,
+                    state_JZ = 6'd36,
+                    state_JZ2 = 6'd37,
+                    state_JZ3 = 6'd38,
+                    state_HLT = 6'd39;
+                    
+    reg [5:0] state, next_state;
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            state <= search1;
+        end else begin
+            state <= next_state;
+        end
+    end
+    
+    always @ (*) begin
+        cargaREM = 1'b0; cargaRI = 1'b0; gotot0 = 1'b0; selRDM = 1'b0; 
+        carga_AC = 1'b0; carga_NZ = 1'b0; carga_PC = 1'b0; incrementa_PC = 1'b0; 
+        sel = 1'b0; selREM = 1'b0; write = 1'b0; read = 1'b0; 
+        UALy = 1'b1;
+        UALadd = 1'b0; UALor = 1'b0; UALand = 1'b0; UALnot = 1'b0; cargaRDM = 1'b0; 
+
+        next_state = state; 
+
+        case(state)
+            search1: begin 
+                cargaREM = 1'b1; 
+                sel = 1'b0; 
+                next_state = search2;
+            end
+            
+            search2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1; 
+                next_state = search3; 
+            end
+            
+            search3: begin 
+                cargaRI = 1'b1; 
+                next_state = decode_state; 
+            end
+
+            decode_state: begin 
+                if(hlt) next_state = state_HLT;
+                else if(NOP) next_state = search1;
+                else if(LDA) next_state = state_LDA;
+                else if(ADD) next_state = state_ADD;
+                else if(STA) next_state = state_STA;
+                else if(OR)  next_state = state_OR;
+                else if(AND) next_state = state_AND;
+                else if(NOT) next_state = state_NOT;
+                else if(JMP) next_state = state_JMP;
+                else if(JN) next_state = state_JN;
+                else if(JZ) next_state = state_JZ;
+                else next_state = search1;
+            end
+            
+            state_LDA: begin 
+                cargaREM = 1'b1; 
+                sel = 1'b0;
+                next_state = state_LDA2;
+            end
+            
+            state_LDA2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1; 
+                next_state = state_LDA3;                
+            end
+
+            state_LDA3: begin 
+                cargaREM = 1'b1; 
+                sel = 1'b1;  
+                next_state = state_LDA4;                
+            end
+            
+            state_LDA4: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_LDA5;                
+            end
+
+            state_LDA5: begin 
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;  
+                next_state = search1; 
+            end
+
+            state_ADD: begin 
+                cargaREM = 1'b1;
+                sel = 1'b0; 
+                next_state = state_ADD2;  
+            end
+
+            state_ADD2: begin 
+                read = 1'b1;
+                incrementa_PC = 1'b1;
+                cargaRDM = 1'b1;
+                next_state = state_ADD3;  
+            end
+
+            state_ADD3: begin 
+                cargaREM = 1'b1;
+                sel = 1'b1;
+                next_state = state_ADD4;  
+            end
+
+            state_ADD4: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1;
+                next_state = state_ADD5;  
+            end
+
+            state_ADD5: begin 
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALadd = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;  
+            end
+
+            state_STA: begin
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_STA2;  
+            end
+
+            state_STA2: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1; 
+                next_state = state_STA3;  
+            end
+
+            state_STA3: begin
+                cargaREM = 1'b1;
+                sel = 1'b1; 
+                next_state = state_STA4; 
+            end
+
+            state_STA4: begin
+                cargaRDM = 1'b1; 
+                selRDM = 1'b1; 
+                next_state = state_STA5; 
+            end
+
+            state_STA5: begin
+                write = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_OR: begin
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_OR2;
+            end
+
+            state_OR2: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1;
+                next_state = state_OR3;
+            end
+
+            state_OR3: begin
+                cargaREM = 1'b1;
+                sel = 1'b1;        
+                next_state = state_OR4;
+            end
+
+            state_OR4: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_OR5;
+            end
+
+            state_OR5: begin
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALor = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_AND: begin
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_AND2;
+            end
+
+            state_AND2: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                incrementa_PC = 1'b1;
+                next_state = state_AND3;
+            end
+
+            state_AND3: begin
+                cargaREM = 1'b1;
+                sel = 1'b1;        
+                next_state = state_AND4;
+            end
+
+            state_AND4: begin
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_AND5;
+            end
+
+            state_AND5: begin
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALand = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_NOT: begin
+                carga_AC = 1'b1;
+                carga_NZ = 1'b1;
+                UALy = 1'b0;
+                UALnot = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_JMP: begin 
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_JMP2;
+            end
+            state_JMP2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JMP3;
+            end
+            state_JMP3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_JN: begin 
+                if (N) begin
+                    cargaREM = 1'b1;
+                    sel = 1'b0;
+                    next_state = state_JN2;
+                end else begin
+                    incrementa_PC = 1'b1;
+                    gotot0 = 1'b1;
+                    next_state = search1;
+                end
+            end
+
+            state_JN2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JN3;
+            end
+
+            state_JN3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+        
+            state_JZ: begin 
+                if (SZ) begin
+                    cargaREM = 1'b1;
+                    sel = 1'b0;
+                    next_state = state_JZ2;
+                end else begin
+                    incrementa_PC = 1'b1;
+                    gotot0 = 1'b1;
+                    next_state = search1;
+                end
+            end
+
+            state_JZ2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JZ3;
+            end
+
+            state_JZ3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_HLT: begin
+                next_state = state_HLT;
+            end
+
+            default: begin
+                next_state = search1;
+            end
+        endcase
+    end
+endmodule
+
+module Counter (
+    output reg [2:0] Count,
+    input wire Clock, Reset 
+);
+    always @ (posedge Clock or posedge Reset)
+        begin
+            if (Reset)
+                Count <= 0;
+            else
+                Count <= Count + 1;
+        end
+endmodule
+
+module D_Flip_Flop_main #(
+    parameter N = 8
+)(
+    input wire clk, reset, enable,
+    input wire [N-1:0] data,
+    output reg [N-1:0] data_out
+);
+
+always @(posedge clk or posedge reset) begin
+    if (reset) begin
+        data_out <= {N{1'b0}};
+    end else if (enable) begin
+        data_out <= data;
+    end 
+end
+    
+endmodule
+
+module D_Flip_Flop (
+    output reg Q,
+    input wire clk, D
+    );
+        always @(posedge clk)
+             begin
+                Q <= D;
+            end
+endmodule
+
+module decoder (
+    input wire [3:0] Op,
+    output reg nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt
+);
+
+    always @(Op) begin
+        case(Op)
+            4'b0000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b1000000000000000; // NOP
+            4'b0001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0100000000000000; // STA
+            4'b0010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0010000000000000; // LDA
+            4'b0011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0001000000000000; // ADD
+            4'b0100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000100000000000; // OR
+            4'b0101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000010000000000; // AND
+            4'b0110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000001000000000; // NOT
+            4'b0111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000100000000; // unused
+            4'b1000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000010000000; // jmp
+            4'b1001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000001000000; // jn
+            4'b1010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000100000; // jz
+            
+            4'b1011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000010000; // unused2
+            4'b1100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000001000; // unused3
+            4'b1101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000100; // unused4
+            4'b1110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000010; // unused5
+
+            4'b1111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000001; // HLT
+            default: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000000; // default
+             
+        endcase
+    end
+endmodule
+
+
+module mem_sis(
+        input wire [7:0] rem_d, mux1,
+        input wire r_z, write, read, clr, mux_sel1, rem_e, rdm_e,
+        input wire clk,
+        output wire [7:0] rdm_out
+    );
+
+    //Conexoes entre blocos 
+    wire [7:0] w_mem_data;
+
+    //Registradores de Estado da Maquina
+    reg [1:0] current_state, next_state;
+
+    //Registradores de Endereço e de Dados da Memoria
+    reg [7:0] rem, rdm, mux_output;
+
+    //Memoria Ram - Vetor
+    reg [7:0] mem [0:255];
+
+    parameter wait_m = 2'b00,
+        write_m = 2'b01,
+        read_m = 2'b10,
+        clear_m = 2'b11;
+
+    //Logica Resgistrador de Estados
+    always @ ( posedge clk or posedge r_z) begin
+        if(r_z) begin
+            current_state <= wait_m;
+        end else begin
+            current_state <= next_state;
+        end
+    end
+
+    //Logica dos Registradores de dados, enderecos e memoria
+    always @ ( posedge clk  or posedge r_z) begin
+        if (r_z) begin
+            rdm <= 8'h00;
+            rem <= 8'h00;
+
+             // ------------------------------------------
+            // Programa
+            // ------------------------------------------
+
+            mem[8'h00] <= 8'h20; // LDA 80
+            mem[8'h01] <= 8'h80;
+
+            mem[8'h02] <= 8'h30; // ADD 81
+            mem[8'h03] <= 8'h81;
+
+            mem[8'h04] <= 8'h10; // STA 82
+            mem[8'h05] <= 8'h82;
+
+            mem[8'h06] <= 8'h40; // OR 83
+            mem[8'h07] <= 8'h83;
+
+            mem[8'h08] <= 8'h50; // AND 84
+            mem[8'h09] <= 8'h84;
+
+            mem[8'h0A] <= 8'h60; // NOT
+
+            mem[8'h0B] <= 8'hA0; // JZ 21
+            mem[8'h0C] <= 8'h21;
+
+            mem[8'h0D] <= 8'h90; // JN 10
+            mem[8'h0E] <= 8'h10;
+
+            mem[8'h0F] <= 8'hF0; // HLT
+
+
+            mem[8'h10] <= 8'h20; // LDA 85
+            mem[8'h11] <= 8'h85;
+
+            mem[8'h12] <= 8'h90; // JN 21
+            mem[8'h13] <= 8'h21;
+
+            mem[8'h14] <= 8'hA0; // JZ 18
+            mem[8'h15] <= 8'h18;
+
+            mem[8'h16] <= 8'hF0; // HLT
+
+            mem[8'h17] <= 8'h00;
+
+            mem[8'h18] <= 8'h00; // NOP
+
+            mem[8'h19] <= 8'h80; // JMP 1C
+            mem[8'h1A] <= 8'h1C;
+
+            mem[8'h1B] <= 8'hF0; // HLT
+
+            mem[8'h1C] <= 8'h20; // LDA 82
+            mem[8'h1D] <= 8'h82;
+
+            mem[8'h1E] <= 8'h30; // ADD 81
+            mem[8'h1F] <= 8'h81;
+
+            mem[8'h20] <= 8'hF0; // HLT
+
+
+            mem[8'h21] <= 8'h20; // LDA 86
+            mem[8'h22] <= 8'h86;
+
+            mem[8'h23] <= 8'hF0; // HLT
+
+
+            // ------------------------------------------
+            // Dados
+            // ------------------------------------------
+
+            mem[8'h80] <= 8'hA5;
+            mem[8'h81] <= 8'h05;
+            mem[8'h82] <= 8'h00;
+            mem[8'h83] <= 8'h55;
+            mem[8'h84] <= 8'h0F;
+            mem[8'h85] <= 8'h00;
+            mem[8'h86] <= 8'hEE;
+
+        end else begin
+            if (rdm_e) begin 
+                rdm <= mux_output;
+            end
+            if (rem_e) begin
+                rem <= rem_d;
+            end
+            case(current_state)
+                wait_m: begin
+                    //Estado de espera, nenhuma instrução é executada.
+                end
+                write_m: begin
+                    mem[rem] <= rdm;
+                end
+                clear_m: begin
+                    //Estado nao utilizado devido a complexidade de implementacao de limpeza de todos os endereços de memoria.
+                end
+            endcase
+        end
+    end
+
+    // Logica dos Proximos Estados
+    always @ (*) begin
+        next_state = current_state;
+        case(current_state)
+            wait_m:  begin
+                if (write & !read & !clr) begin
+                    next_state = write_m;
+                end else if (!write & read & !clr) begin
+                    next_state = read_m;
+                end else if (!write & !read & clr) begin
+                    next_state = clear_m;
+                end else begin
+                    next_state = wait_m;
+                end
+            end
+            write_m:
+                next_state = wait_m;
+            read_m:
+                next_state = wait_m;
+            clear_m:
+                next_state = wait_m;
+            default: 
+                next_state = wait_m;
+        endcase
+    end
+
+    //Logica Combinacional - Independente do Clock
+    always @ (*) begin
+        case(mux_sel1)
+            1'b0: mux_output = mem[rem];
+            1'b1: mux_output = mux1;
+            default: mux_output = 8'h00;
+        endcase
+    end
+
+    assign rdm_out = rdm;
+
+endmodule
+
+module Multiplexer_8bits (
+    input wire       sel,
+    input wire [7:0] in0, in1,
+    output reg [7:0] out
+);
+
+    always @(*) begin
+        if (sel)
+            out = in1;
+        else
+            out = in0;
+    end
+
+endmodule
+
+module PC (
+    output reg [7:0] count,
+    input wire clk, reset, enable, Load,
+    input wire [7:0] count_in
+);
+    always @ (posedge clk or posedge reset)
+    begin
+        if (reset)
+            count <= 0;
+        else if (enable)
+                if(Load)
+                    count <= count_in;
+                else
+                    count <= count + 1;
+                end
+endmodule
+
+module Temporization_architecture (
+    input wire clk,
+    input wire halt, goto_t0,
+    output reg  t0, t1, t2, t3, t4, t5, t6, t7
+);
+
+    wire to_reg2, to_counter, hlt_to_dec;
+    wire [2:0] to_dec; 
+
+     D_Flip_Flop  u1(
+        .Q(to_reg2),
+        .clk(clk),
+        .D(goto_t0)
+    );
+
+     D_Flip_Flop  u2(
+        .Q(to_counter),
+        .clk(clk),
+        .D(to_reg2)
+    );
+
+     Counter  u3(
+        .Count(to_dec),
+        .Clock(clk),
+        .Reset(to_counter)
+    );
+
+    always @ (posedge clk)
+        case(to_dec)
+            3'b000: begin
+                t0 <= 1'b1;t1 <= 1'b0;t2 <= 1'b0;t3 <= 1'b0;t4 <= 1'b0;t5 <= 1'b0;t6 <= 1'b0;t7 <= 1'b0;
+            end
+            3'b001: begin
+                t0 <= 1'b0;t1 <= 1'b1;t2 <= 1'b0;t3 <= 1'b0;t4 <= 1'b0;t5 <= 1'b0;t6 <= 1'b0;t7 <= 1'b0;
+            end
+            3'b010: begin
+                t0 <= 1'b0;t1 <= 1'b0;t2 <= 1'b1;t3 <= 1'b0;t4 <= 1'b0;t5 <= 1'b0;t6 <= 1'b0;t7 <= 1'b0;
+            end
+            3'b011: begin
+                t0 <= 1'b0;t1 <= 1'b0;t2 <= 1'b0;t3 <= 1'b1;t4 <= 1'b0;t5 <= 1'b0;t6 <= 1'b0;t7 <= 1'b0;
+            end
+            3'b100: begin
+                t0 <= 1'b0;t1 <= 1'b0;t2 <= 1'b0;t3 <= 1'b0;t4 <= 1'b1;t5 <= 1'b0;t6 <= 1'b0;t7 <= 1'b0;
+            end
+            3'b101: begin
+                t0 <= 1'b0;t1 <= 1'b0;t2 <= 1'b0;t3 <= 1'b0;t4 <= 1'b0;t5 <= 1'b1;t6 <= 1'b0;t7 <= 1'b0;
+            end
+            3'b110: begin
+                t0 <= 1'b0;t1 <= 1'b0;t2 <= 1'b0;t3 <= 1'b0;t4 <= 1'b0;t5 <= 1'b0;t6 <= 1'b1;t7 <= 1'b0;
+            end
+            3'b111: begin
+                t0 <= 1'b1;t1 <= 1'b0;t2 <= 1'b0;t3 <= 1'b0;t4 <= 1'b0;t5 <= 1'b0;t6 <= 1'b0;t7 <= 1'b1;
+            end
+
+        endcase
+
+
+
+
+endmodule
