@@ -225,7 +225,7 @@ module Control_Block (
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
-    parameter [4:0] search1 = 5'b00000, 
+    parameter [5:0] search1 = 5'b00000, 
                     search2 = 5'b00001, 
                     search3 = 5'b00010, 
                     decode_state = 5'b00011,
@@ -254,10 +254,15 @@ module Control_Block (
                     state_AND3 = 5'b11010,
                     state_AND4 = 5'b11011,
                     state_AND5 = 5'b11100,
-                    state_NOT = 5'b11111;
+                    state_NOT = 5'b11111,
                     //state_NOP = 5'b10001;
+                    state_JUMP  = 6'b100000,
+                    state_JUMP2 = 6'b100001,
+                    state_JUMP3 = 6'b100010,
+                    state_HLT   = 6'b100011;
+
                     
-    reg [4:0] state, next_state;
+    reg [5:0] state, next_state;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -296,13 +301,15 @@ module Control_Block (
             end
 
             decode_state: begin 
-                if(NOP) next_state = search1;
+                if(hlt) next_state = state_HLT;
+                else if(NOP) next_state = search1;
                 else if(LDA) next_state = state_LDA;
                 else if(ADD) next_state = state_ADD;
                 else if(STA) next_state = state_STA;
-                else if(OR) next_state = state_OR;
+                else if(OR)  next_state = state_OR;
                 else if(AND) next_state = state_AND;
                 else if(NOT) next_state = state_NOT;
+                else if(JMP || JN || JZ) next_state = state_JUMP;
                 else next_state = search1;
             end
             
@@ -418,7 +425,7 @@ module Control_Block (
 
             state_OR3: begin
                 cargaREM = 1'b1;
-                selRDM = 1'b1; 
+                sel = 1'b1;        // era selRDM = 1'b1;
                 next_state = state_OR4;
             end
 
@@ -452,7 +459,7 @@ module Control_Block (
 
             state_AND3: begin
                 cargaREM = 1'b1;
-                selRDM = 1'b1; 
+                sel = 1'b1;        // era selRDM = 1'b1;
                 next_state = state_AND4;
             end
 
@@ -479,7 +486,30 @@ module Control_Block (
                 gotot0 = 1'b1;
                 next_state = search1;
             end
-        
+
+            state_JUMP: begin
+                cargaREM = 1'b1;
+                sel      = 1'b0;
+                next_state = state_JUMP2;
+            end
+
+            state_JUMP2: begin
+                read     = 1'b1;
+                cargaRDM = 1'b1;
+                selRDM   = 1'b0;
+                next_state = state_JUMP3;
+            end
+
+            state_JUMP3: begin
+                incrementa_PC = 1'b1;
+                carga_PC = JMP | (JN & N) | (JZ & SZ);
+                gotot0   = 1'b1;
+                next_state = search1;
+            end
+
+            state_HLT: begin
+                next_state = state_HLT;
+            end
 
             default: begin
                 next_state = search1;
@@ -537,18 +567,26 @@ module decoder (
 
     always @(Op) begin
         case(Op)
-            4'b0000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b1000000000000000;
-            4'b0001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0100000000000000;
-            4'b0010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0010000000000000;
-            4'b0011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0001000000000000;
-            4'b0100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000100000000000;
-            4'b0101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000010000000000;
-            4'b0110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000001000000000;
-            4'b0111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000100000000;
-            4'b1000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000010000000;
-            4'b1001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000001000000;
-            4'b1010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000100000;
-            default: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000000; 
+            4'b0000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b1000000000000000; // NOP
+            4'b0001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0100000000000000; // STA
+            4'b0010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0010000000000000; // LDA
+            4'b0011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0001000000000000; // ADD
+            4'b0100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000100000000000; // OR
+            4'b0101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000010000000000; // AND
+            4'b0110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000001000000000; // NOT
+            4'b0111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000100000000; // unused
+            4'b1000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000010000000; // jmp
+            4'b1001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000001000000; // jn
+            4'b1010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000100000; // jz
+            
+            4'b1011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000010000; // unused2
+            4'b1100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000001000; // unused3
+            4'b1101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000100; // unused4
+            4'b1110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000010; // unused5
+
+            4'b1111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000001; // HLT
+            default: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000000; // default
+             
         endcase
     end
 endmodule
