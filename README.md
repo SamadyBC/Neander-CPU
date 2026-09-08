@@ -162,7 +162,7 @@ The system relies on two key Finite State Machines:
 ### 1. Control Block FSM
 The Control Block FSM (`Control_Block.v`) manages instruction fetch (`search1` -> `search2` -> `search3`), instruction decoding (`decode_state`), and execution sequences for each instruction in the ISA.
 
-<!-- PLACEHOLDER FOR CONTROL BLOCK FSM IMAGE -->
+
 ![Control Block FSM](images/sys_fsm.png)
 
 ---
@@ -170,7 +170,9 @@ The Control Block FSM (`Control_Block.v`) manages instruction fetch (`search1` -
 ### 2. Memory System FSM
 The Memory System FSM (`mem_sis.v`) handles RAM access synchronization and memory operations (`wait_m`, `read_m`, `write_m`, and `clear_m`).
 
-<img width="6429" height="1682" alt="MemmorySystem_FSM-2026-09-08-170951" src="https://github.com/user-attachments/assets/8844d9e2-3093-4028-87cb-673571ea8f6b" />
+
+![Memory System FSM](images/MemorySystem_FSM_En.png)
+
 
 
 ---
