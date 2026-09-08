@@ -431,7 +431,7 @@ module Control_Block (
 
             state_OR3: begin
                 cargaREM = 1'b1;
-                selRDM = 1'b1;        // era selRDM = 1'b1;
+                sel = 1'b1;        // era selRDM = 1'b1;
                 next_state = state_OR4;
             end
 
@@ -465,7 +465,7 @@ module Control_Block (
 
             state_AND3: begin
                 cargaREM = 1'b1;
-                selRDM = 1'b1;        // era selRDM = 1'b1;
+                sel = 1'b1;        // era selRDM = 1'b1;
                 next_state = state_AND4;
             end
 
