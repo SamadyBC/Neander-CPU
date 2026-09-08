@@ -675,10 +675,10 @@ initial begin
     mem[8'h08] = 8'h50; // AND 
     mem[8'h09] = 8'h84;
     mem[8'h0A] = 8'h60; // NOT 
-    mem[8'h0B] = 8'h90; // JN 
+    mem[8'h0B] = 8'ha0; // JZ 
     mem[8'h0C] = 8'h10; // (pula para 10)
     
-    mem[8'h10] = 8'h80; // JMP 
+    mem[8'h10] = 8'hf0; // HLT
     mem[8'h11] = 8'h15;
     
     mem[8'h15] = 8'h20; // LDA 
