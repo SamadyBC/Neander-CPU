@@ -34,7 +34,7 @@ module tb_Main;
 
         // Deixa a simulação rodar tempo suficiente para buscar e executar a instrução
         // Como o acesso e execução demoram alguns ciclos, 100ns deve ser suficiente para ver o teste
-        #200;
+        #1200;
         
         // Exibe o valor final no terminal
         $display("--- Fim da Simulacao ---");

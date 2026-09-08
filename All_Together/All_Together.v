@@ -225,39 +225,49 @@ module Control_Block (
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
-    parameter [4:0] search1 = 5'b00000, 
-                    search2 = 5'b00001, 
-                    search3 = 5'b00010, 
-                    decode_state = 5'b00011,
-                    state_LDA = 5'b00100, 
-                    state_LDA2 = 5'b00101, 
-                    state_LDA3 = 5'b00110, 
-                    state_LDA4 = 5'b00111, 
-                    state_LDA5 = 5'b01000, 
-                    state_ADD = 5'b01001,
-                    state_ADD2 = 5'b01010,
-                    state_ADD3 = 5'b01011,
-                    state_ADD4 = 5'b01100,
-                    state_ADD5 = 5'b01101,
-                    state_STA = 5'b01110,
-                    state_STA2 = 5'b01111,
-                    state_STA3 = 5'b10000,
-                    state_STA4 = 5'b10001,
-                    state_STA5 = 5'b10010,
-                    state_OR = 5'b10011,
-                    state_OR2 = 5'b10100,
-                    state_OR3 = 5'b10101,
-                    state_OR4 = 5'b10110,
-                    state_OR5 = 5'b10111,
-                    state_AND = 5'b11000,
-                    state_AND2 = 5'b11001,
-                    state_AND3 = 5'b11010,
-                    state_AND4 = 5'b11011,
-                    state_AND5 = 5'b11100,
-                    state_NOT = 5'b11111;
-                    //state_NOP = 5'b10001;
+    parameter [5:0]  //trooquei para decimal, ajuda a ler
+                    search1 = 6'd0,
+                    search2 = 6'd1,
+                    search3 = 6'd2, 
+                    decode_state = 6'd3,
+                    state_LDA = 6'd4,
+                    state_LDA2 = 6'd5, 
+                    state_LDA3 = 6'd6, 
+                    state_LDA4 = 6'd7, 
+                    state_LDA5 = 6'd8,
+                    state_ADD = 6'd9, 
+                    state_ADD2 = 6'd10, 
+                    state_ADD3 = 6'd11, 
+                    state_ADD4 = 6'd12, 
+                    state_ADD5 = 6'd13,
+                    state_STA = 6'd14, 
+                    state_STA2 = 6'd15, 
+                    state_STA3 = 6'd16, 
+                    state_STA4 = 6'd17, 
+                    state_STA5 = 6'd18,
+                    state_OR = 6'd19, 
+                    state_OR2 = 6'd20, 
+                    state_OR3 = 6'd21, 
+                    state_OR4 = 6'd22, 
+                    state_OR5 = 6'd23,
+                    state_AND = 6'd24, 
+                    state_AND2 = 6'd25, 
+                    state_AND3 = 6'd26, 
+                    state_AND4 = 6'd27, 
+                    state_AND5 = 6'd28,
+                    state_NOT = 6'd29,
+                    state_JMP = 6'd30, 
+                    state_JMP2 = 6'd31, 
+                    state_JMP3 = 6'd32,
+                    state_JN = 6'd33, 
+                    state_JN2 = 6'd34, 
+                    state_JN3 = 6'd35,
+                    state_JZ = 6'd36,
+                    state_JZ2 = 6'd37,
+                    state_JZ3 = 6'd38,
+                    state_HLT = 6'd39;
                     
-    reg [4:0] state, next_state;
+    reg [5:0] state, next_state;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
@@ -296,17 +306,20 @@ module Control_Block (
             end
 
             decode_state: begin 
-                if(NOP) next_state = search1;
+                if(hlt) next_state = state_HLT;
+                else if(NOP) next_state = search1;
                 else if(LDA) next_state = state_LDA;
                 else if(ADD) next_state = state_ADD;
                 else if(STA) next_state = state_STA;
-                else if(OR) next_state = state_OR;
+                else if(OR)  next_state = state_OR;
                 else if(AND) next_state = state_AND;
                 else if(NOT) next_state = state_NOT;
+                else if(JMP) next_state = state_JMP;
+                else if(JN) next_state = state_JN;
+                else if(JZ) next_state = state_JZ;
                 else next_state = search1;
             end
             
-            // --- INÍCIO DO CICLO LDA (5 Estados) ---
             state_LDA: begin 
                 cargaREM = 1'b1; 
                 sel = 1'b0;
@@ -418,7 +431,7 @@ module Control_Block (
 
             state_OR3: begin
                 cargaREM = 1'b1;
-                selRDM = 1'b1; 
+                sel = 1'b1;        // era selRDM = 1'b1;
                 next_state = state_OR4;
             end
 
@@ -452,7 +465,7 @@ module Control_Block (
 
             state_AND3: begin
                 cargaREM = 1'b1;
-                selRDM = 1'b1; 
+                sel = 1'b1;        // era selRDM = 1'b1;
                 next_state = state_AND4;
             end
 
@@ -479,7 +492,75 @@ module Control_Block (
                 gotot0 = 1'b1;
                 next_state = search1;
             end
+
+            state_JMP: begin 
+                cargaREM = 1'b1;
+                sel = 1'b0;
+                next_state = state_JMP2;
+            end
+            state_JMP2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JMP3;
+            end
+            state_JMP3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_JN: begin 
+                if (N) begin
+                    cargaREM = 1'b1;
+                    sel = 1'b0;
+                    next_state = state_JN2;
+                end else begin
+                    incrementa_PC = 1'b1;
+                    gotot0 = 1'b1;
+                    next_state = search1;
+                end
+            end
+            state_JN2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JN3;
+            end
+            state_JN3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
         
+            state_JZ: begin 
+                if (SZ) begin
+                    cargaREM = 1'b1;
+                    sel = 1'b0;
+                    next_state = state_JZ2;
+                end else begin
+                    incrementa_PC = 1'b1;   // pula o byte do operando
+                    gotot0 = 1'b1;
+                    next_state = search1;
+                end
+            end
+
+            state_JZ2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JZ3;
+            end
+
+            state_JZ3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_HLT: begin
+                next_state = state_HLT;
+            end
 
             default: begin
                 next_state = search1;
@@ -537,18 +618,26 @@ module decoder (
 
     always @(Op) begin
         case(Op)
-            4'b0000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b1000000000000000;
-            4'b0001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0100000000000000;
-            4'b0010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0010000000000000;
-            4'b0011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0001000000000000;
-            4'b0100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000100000000000;
-            4'b0101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000010000000000;
-            4'b0110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000001000000000;
-            4'b0111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000100000000;
-            4'b1000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000010000000;
-            4'b1001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000001000000;
-            4'b1010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000100000;
-            default: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000000; 
+            4'b0000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b1000000000000000; // NOP
+            4'b0001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0100000000000000; // STA
+            4'b0010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0010000000000000; // LDA
+            4'b0011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0001000000000000; // ADD
+            4'b0100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000100000000000; // OR
+            4'b0101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000010000000000; // AND
+            4'b0110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000001000000000; // NOT
+            4'b0111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000100000000; // unused
+            4'b1000: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000010000000; // jmp
+            4'b1001: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000001000000; // jn
+            4'b1010: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000100000; // jz
+            
+            4'b1011: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000010000; // unused2
+            4'b1100: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000001000; // unused3
+            4'b1101: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000100; // unused4
+            4'b1110: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000010; // unused5
+
+            4'b1111: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000001; // HLT
+            default: {nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt} = 16'b0000000000000000; // default
+             
         endcase
     end
 endmodule
@@ -573,17 +662,60 @@ module mem_sis(
     //Memoria Ram - Vetor
     reg [7:0] mem [0:255];
     
-    initial mem [0] = 8'h20; 
-    initial mem [1] = 8'h06;
-  	initial mem [2] = 8'h30;
-  	initial mem [3] = 8'h07;
-  	initial mem [4] = 8'h60;
-    initial mem [5] = 8'h08;
-  	initial mem [6] = 8'h02;
-  	initial mem [7] = 8'h02;
-    initial mem [8] = 8'h02;
+initial begin
+    // teste
+    // ---- programa de teste: todas as instrucoes ----
+    mem[8'h00] = 8'h20; // LDA 80
+    mem[8'h01] = 8'h80;
+    mem[8'h02] = 8'h30; // ADD 81
+    mem[8'h03] = 8'h81;
+    mem[8'h04] = 8'h10; // STA 82
+    mem[8'h05] = 8'h82;
+    mem[8'h06] = 8'h40; // OR  83
+    mem[8'h07] = 8'h83;
+    mem[8'h08] = 8'h50; // AND 84
+    mem[8'h09] = 8'h84;
+    mem[8'h0A] = 8'h60; // NOT
+    mem[8'h0B] = 8'hA0; // JZ  21   (Z=0, segue reto)
+    mem[8'h0C] = 8'h21;
+    mem[8'h0D] = 8'h90; // JN  10   (N=1, desvia)
+    mem[8'h0E] = 8'h10;
+    mem[8'h0F] = 8'hF0; // HLT      armadilha
 
-    //Constantes para os estados 
+    mem[8'h10] = 8'h20; // LDA 85
+    mem[8'h11] = 8'h85;
+    mem[8'h12] = 8'h90; // JN  21   (N=0, segue reto)
+    mem[8'h13] = 8'h21;
+    mem[8'h14] = 8'hA0; // JZ  18   (Z=1, desvia)
+    mem[8'h15] = 8'h18;
+    mem[8'h16] = 8'hF0; // HLT      armadilha
+
+    mem[8'h17] = 8'h00;
+    mem[8'h18] = 8'h00; // NOP
+    mem[8'h19] = 8'h80; // JMP 1C
+    mem[8'h1A] = 8'h1C;
+    mem[8'h1B] = 8'hF0; // HLT      armadilha
+
+    mem[8'h1C] = 8'h20; // LDA 82   (prova o STA)
+    mem[8'h1D] = 8'h82;
+    mem[8'h1E] = 8'h30; // ADD
+    mem[8'h1F] = 8'h81; // Address 81
+    mem[8'h20] = 8'hF0; // HLT      fim esperado
+
+    mem[8'h21] = 8'h20; // LDA 86   armadilha
+    mem[8'h22] = 8'h86;
+    mem[8'h23] = 8'hF0; // HLT
+
+    // ---- dados ----
+    mem[8'h80] = 8'hA5;
+    mem[8'h81] = 8'h05;
+    mem[8'h82] = 8'h00; // destino do STA
+    mem[8'h83] = 8'h55;
+    mem[8'h84] = 8'h0F;
+    mem[8'h85] = 8'h00;
+    mem[8'h86] = 8'hEE; // sentinela da armadilha
+end
+
     parameter wait_m = 2'b00,
         write_m = 2'b01,
         read_m = 2'b10,
