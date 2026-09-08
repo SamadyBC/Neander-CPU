@@ -261,7 +261,11 @@ module Control_Block (
                     state_JMP3 = 6'd32,
                     state_JN = 6'd33, 
                     state_JN2 = 6'd34, 
-                    state_JN3 = 6'd35;
+                    state_JN3 = 6'd35,
+                    state_JZ = 6'd36,
+                    state_JZ2 = 6'd37,
+                    state_JZ3 = 6'd38,
+                    state_HLT = 6'd39;
                     
     reg [5:0] state, next_state;
 
@@ -312,6 +316,7 @@ module Control_Block (
                 else if(NOT) next_state = state_NOT;
                 else if(JMP) next_state = state_JMP;
                 else if(JN) next_state = state_JN;
+                else if(JZ) next_state = state_JZ;
                 else next_state = search1;
             end
             
@@ -528,6 +533,34 @@ module Control_Block (
                 next_state = search1;
             end
         
+            state_JZ: begin 
+                if (SZ) begin
+                    cargaREM = 1'b1;
+                    sel = 1'b0;
+                    next_state = state_JZ2;
+                end else begin
+                    incrementa_PC = 1'b1;   // pula o byte do operando
+                    gotot0 = 1'b1;
+                    next_state = search1;
+                end
+            end
+
+            state_JZ2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JZ3;
+            end
+
+            state_JZ3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+
+            state_HLT: begin
+                next_state = state_HLT;
+            end
 
             default: begin
                 next_state = search1;
