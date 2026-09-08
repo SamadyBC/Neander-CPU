@@ -108,8 +108,8 @@ The Control Block FSM (`Control_Block.v`) manages instruction fetch (`search1` -
 ### 2. Memory System FSM
 The Memory System FSM (`mem_sis.v`) handles RAM access synchronization and memory operations (`wait_m`, `read_m`, `write_m`, and `clear_m`).
 
-<!-- PLACEHOLDER FOR MEMORY SYSTEM FSM IMAGE -->
-![Memory System FSM](docs/images/memory_system_fsm.png)
+<img width="6429" height="1682" alt="MemmorySystem_FSM-2026-09-08-170951" src="https://github.com/user-attachments/assets/8844d9e2-3093-4028-87cb-673571ea8f6b" />
+
 
 ---
 
@@ -129,3 +129,4 @@ The Memory System FSM (`mem_sis.v`) handles RAM access synchronization and memor
 Testbenches and VCD waveform output files are provided for verifying design behavior:
 - Run testbenches using Verilog simulators like Icarus Verilog (`iverilog`) or ModelSim.
 - View `.vcd` files (e.g., `neander.vcd`, `mem_sis.vcd`, `dump.vcd`) using **GTKWave**.
+
