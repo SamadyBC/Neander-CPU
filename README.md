@@ -98,7 +98,7 @@ The system relies on two key Finite State Machines:
 The Control Block FSM (`Control_Block.v`) manages instruction fetch (`search1` -> `search2` -> `search3`), instruction decoding (`decode_state`), and execution sequences for each instruction in the ISA.
 
 <!-- PLACEHOLDER FOR CONTROL BLOCK FSM IMAGE -->
-![Control Block FSM](docs/images/control_block_fsm.png)
+![Control Block FSM](images/sys_fsm.png)
 
 ---
 
