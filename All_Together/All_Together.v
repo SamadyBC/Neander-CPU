@@ -225,7 +225,7 @@ module Control_Block (
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
-    parameter [5:0]  //trooquei para decimal, ajuda a ler
+    parameter [5:0]
                     search1 = 6'd0,
                     search2 = 6'd1,
                     search3 = 6'd2, 
@@ -281,7 +281,7 @@ module Control_Block (
         cargaREM = 1'b0; cargaRI = 1'b0; gotot0 = 1'b0; selRDM = 1'b0; 
         carga_AC = 1'b0; carga_NZ = 1'b0; carga_PC = 1'b0; incrementa_PC = 1'b0; 
         sel = 1'b0; selREM = 1'b0; write = 1'b0; read = 1'b0; 
-        UALy = 1'b1; // Padrão da ULA é apenas transitar o dado
+        UALy = 1'b1;
         UALadd = 1'b0; UALor = 1'b0; UALand = 1'b0; UALnot = 1'b0; cargaRDM = 1'b0; 
 
         next_state = state; 
@@ -431,7 +431,7 @@ module Control_Block (
 
             state_OR3: begin
                 cargaREM = 1'b1;
-                sel = 1'b1;        // era selRDM = 1'b1;
+                sel = 1'b1;        
                 next_state = state_OR4;
             end
 
@@ -465,7 +465,7 @@ module Control_Block (
 
             state_AND3: begin
                 cargaREM = 1'b1;
-                sel = 1'b1;        // era selRDM = 1'b1;
+                sel = 1'b1;        
                 next_state = state_AND4;
             end
 
@@ -521,11 +521,13 @@ module Control_Block (
                     next_state = search1;
                 end
             end
+
             state_JN2: begin 
                 read = 1'b1; 
                 cargaRDM = 1'b1; 
                 next_state = state_JN3;
             end
+
             state_JN3: begin 
                 carga_PC = 1'b1;
                 incrementa_PC = 1'b1;
@@ -539,7 +541,7 @@ module Control_Block (
                     sel = 1'b0;
                     next_state = state_JZ2;
                 end else begin
-                    incrementa_PC = 1'b1;   // pula o byte do operando
+                    incrementa_PC = 1'b1;
                     gotot0 = 1'b1;
                     next_state = search1;
                 end
@@ -612,7 +614,6 @@ endmodule
 
 module decoder (
     input wire [3:0] Op,
-    // Alterado de 'output wire' para 'output reg'
     output reg nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt
 );
 
@@ -662,59 +663,59 @@ module mem_sis(
     //Memoria Ram - Vetor
     reg [7:0] mem [0:255];
     
-initial begin
-    // teste
-    // ---- programa de teste: todas as instrucoes ----
-    mem[8'h00] = 8'h20; // LDA 80
-    mem[8'h01] = 8'h80;
-    mem[8'h02] = 8'h30; // ADD 81
-    mem[8'h03] = 8'h81;
-    mem[8'h04] = 8'h10; // STA 82
-    mem[8'h05] = 8'h82;
-    mem[8'h06] = 8'h40; // OR  83
-    mem[8'h07] = 8'h83;
-    mem[8'h08] = 8'h50; // AND 84
-    mem[8'h09] = 8'h84;
-    mem[8'h0A] = 8'h60; // NOT
-    mem[8'h0B] = 8'hA0; // JZ  21   (Z=0, segue reto)
-    mem[8'h0C] = 8'h21;
-    mem[8'h0D] = 8'h90; // JN  10   (N=1, desvia)
-    mem[8'h0E] = 8'h10;
-    mem[8'h0F] = 8'hF0; // HLT      armadilha
+    initial begin
+        // teste
+        // ---- programa de teste: todas as instrucoes ----
+        mem[8'h00] = 8'h20; // LDA 80
+        mem[8'h01] = 8'h80;
+        mem[8'h02] = 8'h30; // ADD 81
+        mem[8'h03] = 8'h81;
+        mem[8'h04] = 8'h10; // STA 82
+        mem[8'h05] = 8'h82;
+        mem[8'h06] = 8'h40; // OR  83
+        mem[8'h07] = 8'h83;
+        mem[8'h08] = 8'h50; // AND 84
+        mem[8'h09] = 8'h84;
+        mem[8'h0A] = 8'h60; // NOT
+        mem[8'h0B] = 8'hA0; // JZ  21   (Z=0, segue reto)
+        mem[8'h0C] = 8'h21;
+        mem[8'h0D] = 8'h90; // JN  10   (N=1, desvia)
+        mem[8'h0E] = 8'h10;
+        mem[8'h0F] = 8'hF0; // HLT      armadilha
 
-    mem[8'h10] = 8'h20; // LDA 85
-    mem[8'h11] = 8'h85;
-    mem[8'h12] = 8'h90; // JN  21   (N=0, segue reto)
-    mem[8'h13] = 8'h21;
-    mem[8'h14] = 8'hA0; // JZ  18   (Z=1, desvia)
-    mem[8'h15] = 8'h18;
-    mem[8'h16] = 8'hF0; // HLT      armadilha
+        mem[8'h10] = 8'h20; // LDA 85
+        mem[8'h11] = 8'h85;
+        mem[8'h12] = 8'h90; // JN  21   (N=0, segue reto)
+        mem[8'h13] = 8'h21;
+        mem[8'h14] = 8'hA0; // JZ  18   (Z=1, desvia)
+        mem[8'h15] = 8'h18;
+        mem[8'h16] = 8'hF0; // HLT      armadilha
 
-    mem[8'h17] = 8'h00;
-    mem[8'h18] = 8'h00; // NOP
-    mem[8'h19] = 8'h80; // JMP 1C
-    mem[8'h1A] = 8'h1C;
-    mem[8'h1B] = 8'hF0; // HLT      armadilha
+        mem[8'h17] = 8'h00;
+        mem[8'h18] = 8'h00; // NOP
+        mem[8'h19] = 8'h80; // JMP 1C
+        mem[8'h1A] = 8'h1C;
+        mem[8'h1B] = 8'hF0; // HLT      armadilha
 
-    mem[8'h1C] = 8'h20; // LDA 82   (prova o STA)
-    mem[8'h1D] = 8'h82;
-    mem[8'h1E] = 8'h30; // ADD
-    mem[8'h1F] = 8'h81; // Address 81
-    mem[8'h20] = 8'hF0; // HLT      fim esperado
+        mem[8'h1C] = 8'h20; // LDA 82   (prova o STA)
+        mem[8'h1D] = 8'h82;
+        mem[8'h1E] = 8'h30; // ADD
+        mem[8'h1F] = 8'h81; // Address 81
+        mem[8'h20] = 8'hF0; // HLT      fim esperado
 
-    mem[8'h21] = 8'h20; // LDA 86   armadilha
-    mem[8'h22] = 8'h86;
-    mem[8'h23] = 8'hF0; // HLT
+        mem[8'h21] = 8'h20; // LDA 86   armadilha
+        mem[8'h22] = 8'h86;
+        mem[8'h23] = 8'hF0; // HLT
 
-    // ---- dados ----
-    mem[8'h80] = 8'hA5;
-    mem[8'h81] = 8'h05;
-    mem[8'h82] = 8'h00; // destino do STA
-    mem[8'h83] = 8'h55;
-    mem[8'h84] = 8'h0F;
-    mem[8'h85] = 8'h00;
-    mem[8'h86] = 8'hEE; // sentinela da armadilha
-end
+        // ---- dados ----
+        mem[8'h80] = 8'hA5;
+        mem[8'h81] = 8'h05;
+        mem[8'h82] = 8'h00; // destino do STA
+        mem[8'h83] = 8'h55;
+        mem[8'h84] = 8'h0F;
+        mem[8'h85] = 8'h00;
+        mem[8'h86] = 8'hEE; // sentinela da armadilha
+    end
 
     parameter wait_m = 2'b00,
         write_m = 2'b01,
@@ -744,32 +745,28 @@ end
             end
             case(current_state)
                 wait_m: begin
-                    //Nao faz nada
+                    //Estado de espera, nenhuma instrução é executada.
                 end
-                // read_m: begin     
-                //     
-                // end
                 write_m: begin
                     mem[rem] <= rdm;
                 end
                 clear_m: begin
-                    //mem = 0; - Ou nao limpar ou reset de todas as posicoes usando loop
+                    //Estado nao utilizado devido a complexidade de implementacao de limpeza de todos os endereços de memoria.
                 end
-
             endcase
         end
     end
 
     // Logica dos Proximos Estados
-    always @ (*)begin
+    always @ (*) begin
         next_state = current_state;
         case(current_state)
             wait_m:  begin
-                if (write) begin
+                if (write & !read & !clr) begin
                     next_state = write_m;
-                end else if (read) begin
+                end else if (!write & read & !clr) begin
                     next_state = read_m;
-                end else if (clr) begin
+                end else if (!write & !read & clr) begin
                     next_state = clear_m;
                 end else begin
                     next_state = wait_m;
