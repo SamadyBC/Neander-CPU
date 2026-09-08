@@ -23,7 +23,7 @@ The Neander architecture is a classic 8-bit accumulator-based computer model. Th
 
 Key characteristics:
 - **Data & Address Width**: 8-bit data bus and 8-bit memory address space (256 bytes memory capacity).
-- **Architecture Type**: Accumulator-based CPU.
+- **Architecture Type**: Accumulator-based CPU, Von-Neumman.
 - **Condition Flags**: `N` (Negative) and `Z` (Zero).
 - **Execution Scheme**: Micro-sequenced Finite State Machine controlling instruction fetch, decode, and execution cycles.
 
@@ -47,9 +47,6 @@ Key characteristics:
 │   └── Temporization_architecture.v # Timing signal generator
 ├── All_Together/                   # Single-file combined design & testbenches
 │   ├── All_Together.v             # Full CPU design consolidated in one file
-│   ├── tb_neander.v               # Top-level Neander processor testbench
-│   ├── tb_neander2.v              # Secondary testbench
-│   └── tb_neander3.v              # Extended instruction set testbench
 ├── testbenches/                    # Independent module testbenches
 │   ├── mem_sis_tb.v               # Memory subsystem testbench
 │   └── testbenchmain.v            # Main CPU testbench
