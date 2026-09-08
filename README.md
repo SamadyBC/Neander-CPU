@@ -7,13 +7,14 @@ An 8-bit modularized Verilog implementation of the **Neander** CPU architecture,
 ## 📋 Table of Contents
 1. [Overview](#-overview)
 2. [Repository Structure](#-repository-structure)
-3. [Architecture & Datapath](#-architecture--datapath)
-4. [Instruction Set Architecture (ISA)](#-instruction-set-architecture-isa)
-5. [Finite State Machines (FSM)](#-finite-state-machines-fsm)
+3. [Running the Code](#-running-the-code).
+4. [Architecture & Datapath](#-architecture--datapath)
+5. [Instruction Set Architecture (ISA)](#-instruction-set-architecture-isa)
+6. [Finite State Machines (FSM)](#-finite-state-machines-fsm)
    - [1. Control Block FSM](#1-control-block-fsm)
    - [2. Memory System FSM](#2-memory-system-fsm)
-6. [Submodule Breakdown](#-submodule-breakdown)
-7. [Simulation & Waveforms](#-simulation--waveforms)
+7. [Submodule Breakdown](#-submodule-breakdown)
+8. [Simulation & Waveforms](#-simulation--waveforms)
 
 ---
 
@@ -52,6 +53,65 @@ Key characteristics:
 │   └── testbenchmain.v            # Main CPU testbench
 └── README.md                       # Project documentation
 ```
+
+---
+
+## ▶️ Running the Code
+
+For a complete CPU simulation, the recommended design file is the consolidated implementation located in:
+
+```text
+All_Together/All_Together.v
+```
+
+The recommended testbench is:
+
+```text
+testbenches/testbenchmain.v
+```
+
+### 1. Compile with Icarus Verilog
+
+From the repository root directory, compile the design and testbench using:
+
+```bash
+iverilog -Wall -g2005 -o neander.vvp All_Together/All_Together.v testbenches/testbenchmain.v
+```
+
+Where:
+
+* `-Wall` enables compiler warnings.
+* `-g2005` enables the Verilog-2005 language standard.
+* `-o neander.vvp` defines the generated simulation executable.
+
+### 2. Run the Simulation
+
+After compilation, execute the generated simulation file with:
+
+```bash
+vvp neander.vvp
+```
+
+The testbench will execute the processor simulation and generate the corresponding VCD waveform file, provided that waveform dumping is enabled in the testbench.
+
+### 3. View the Waveforms
+
+The generated `.vcd` file can be opened using GTKWave:
+
+```bash
+gtkwave neander.vcd
+```
+
+Replace `neander.vcd` with the actual VCD filename defined in the testbench if a different name is being used.
+
+The complete workflow is therefore:
+
+```bash
+iverilog -Wall -g2005 -o neander.vvp All_Together/All_Together.v testbenches/testbenchmain.v
+vvp neander.vvp
+gtkwave neander.vcd
+```
+
 
 ---
 
