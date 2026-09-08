@@ -664,33 +664,54 @@ module mem_sis(
     
 initial begin
     // teste
-    mem[8'h00] = 8'h20; // LDA 
+    // ---- programa de teste: todas as instrucoes ----
+    mem[8'h00] = 8'h20; // LDA 80
     mem[8'h01] = 8'h80;
-    mem[8'h02] = 8'h30; // ADD 
+    mem[8'h02] = 8'h30; // ADD 81
     mem[8'h03] = 8'h81;
-    mem[8'h04] = 8'h10; // STA 
+    mem[8'h04] = 8'h10; // STA 82
     mem[8'h05] = 8'h82;
-    mem[8'h06] = 8'h40; // OR 
+    mem[8'h06] = 8'h40; // OR  83
     mem[8'h07] = 8'h83;
-    mem[8'h08] = 8'h50; // AND 
+    mem[8'h08] = 8'h50; // AND 84
     mem[8'h09] = 8'h84;
-    mem[8'h0A] = 8'h60; // NOT 
-    mem[8'h0B] = 8'ha0; // JZ 
-    mem[8'h0C] = 8'h10; // (pula para 10)
-    
-    mem[8'h10] = 8'hf0; // HLT
-    mem[8'h11] = 8'h15;
-    
-    mem[8'h15] = 8'h20; // LDA 
-    mem[8'h16] = 8'h85; 
-    mem[8'h17] = 8'h90; 
-    mem[8'h18] = 8'h1D; 
-    
-    mem[8'h80] = 8'hA5; 
-    mem[8'h81] = 8'h05; 
-    mem[8'h83] = 8'h55; 
-    mem[8'h84] = 8'h0F; 
-    mem[8'h85] = 8'h00; 
+    mem[8'h0A] = 8'h60; // NOT
+    mem[8'h0B] = 8'hA0; // JZ  20   (Z=0, segue reto)
+    mem[8'h0C] = 8'h20;
+    mem[8'h0D] = 8'h90; // JN  10   (N=1, desvia)
+    mem[8'h0E] = 8'h10;
+    mem[8'h0F] = 8'hF0; // HLT      armadilha
+
+    mem[8'h10] = 8'h20; // LDA 85
+    mem[8'h11] = 8'h85;
+    mem[8'h12] = 8'h90; // JN  20   (N=0, segue reto)
+    mem[8'h13] = 8'h20;
+    mem[8'h14] = 8'hA0; // JZ  18   (Z=1, desvia)
+    mem[8'h15] = 8'h18;
+    mem[8'h16] = 8'hF0; // HLT      armadilha
+
+    mem[8'h17] = 8'h00;
+    mem[8'h18] = 8'h00; // NOP
+    mem[8'h19] = 8'h80; // JMP 1C
+    mem[8'h1A] = 8'h1C;
+    mem[8'h1B] = 8'hF0; // HLT      armadilha
+
+    mem[8'h1C] = 8'h20; // LDA 82   (prova o STA)
+    mem[8'h1D] = 8'h82;
+    mem[8'h1E] = 8'hF0; // HLT      fim esperado
+
+    mem[8'h20] = 8'h20; // LDA 86   armadilha
+    mem[8'h21] = 8'h86;
+    mem[8'h22] = 8'hF0; // HLT
+
+    // ---- dados ----
+    mem[8'h80] = 8'hA5;
+    mem[8'h81] = 8'h05;
+    mem[8'h82] = 8'h00; // destino do STA
+    mem[8'h83] = 8'h55;
+    mem[8'h84] = 8'h0F;
+    mem[8'h85] = 8'h00;
+    mem[8'h86] = 8'hEE; // sentinela da armadilha
 end
 
     parameter wait_m = 2'b00,
