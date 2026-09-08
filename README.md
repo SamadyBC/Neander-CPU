@@ -14,7 +14,7 @@ An 8-bit modularized Verilog implementation of the **Neander** CPU architecture,
    - [1. Control Block FSM](#1-control-block-fsm)
    - [2. Memory System FSM](#2-memory-system-fsm)
 7. [Submodule Breakdown](#-submodule-breakdown)
-8. [Simulation & Waveforms](#-simulation--waveforms)
+9. [Simulation & Waveforms](#-simulation--waveforms)
 
 ---
 
@@ -127,6 +127,11 @@ The Neander CPU consists of the following key functional units:
 - **Arithmetic Logic Unit (ALU)**: Executes operations on AC and RDM outputs (`ADD`, `OR`, `AND`, `NOT`, and pass-through `Y`), updating `N` and `Z` flags.
 - **Instruction Decoder**: Decodes the 4 most significant bits (`Op[7:4]`) of RI into instruction control lines.
 - **Multiplexer (MUX)**: Selects between PC and memory data outputs to feed into REM.
+
+  Representation of Implemented Architecture:
+  ![Architecture_Diagram](images/Architecture_Modules.png)
+
+  For more details check the images/Architecture_Modules.pdf
 
 ---
 
