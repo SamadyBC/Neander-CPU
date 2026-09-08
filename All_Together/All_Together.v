@@ -225,42 +225,43 @@ module Control_Block (
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );
 
-    parameter [5:0] search1 = 5'b00000, 
-                    search2 = 5'b00001, 
-                    search3 = 5'b00010, 
-                    decode_state = 5'b00011,
-                    state_LDA = 5'b00100, 
-                    state_LDA2 = 5'b00101, 
-                    state_LDA3 = 5'b00110, 
-                    state_LDA4 = 5'b00111, 
-                    state_LDA5 = 5'b01000, 
-                    state_ADD = 5'b01001,
-                    state_ADD2 = 5'b01010,
-                    state_ADD3 = 5'b01011,
-                    state_ADD4 = 5'b01100,
-                    state_ADD5 = 5'b01101,
-                    state_STA = 5'b01110,
-                    state_STA2 = 5'b01111,
-                    state_STA3 = 5'b10000,
-                    state_STA4 = 5'b10001,
-                    state_STA5 = 5'b10010,
-                    state_OR = 5'b10011,
-                    state_OR2 = 5'b10100,
-                    state_OR3 = 5'b10101,
-                    state_OR4 = 5'b10110,
-                    state_OR5 = 5'b10111,
-                    state_AND = 5'b11000,
-                    state_AND2 = 5'b11001,
-                    state_AND3 = 5'b11010,
-                    state_AND4 = 5'b11011,
-                    state_AND5 = 5'b11100,
-                    state_NOT = 5'b11111,
-                    //state_NOP = 5'b10001;
-                    state_JUMP  = 6'b100000,
-                    state_JUMP2 = 6'b100001,
-                    state_JUMP3 = 6'b100010,
-                    state_HLT   = 6'b100011;
-
+    parameter [5:0]  //trooquei para decimal, ajuda a ler
+                    search1 = 6'd0,
+                    search2 = 6'd1,
+                    search3 = 6'd2, 
+                    decode_state = 6'd3,
+                    state_LDA = 6'd4,
+                    state_LDA2 = 6'd5, 
+                    state_LDA3 = 6'd6, 
+                    state_LDA4 = 6'd7, 
+                    state_LDA5 = 6'd8,
+                    state_ADD = 6'd9, 
+                    state_ADD2 = 6'd10, 
+                    state_ADD3 = 6'd11, 
+                    state_ADD4 = 6'd12, 
+                    state_ADD5 = 6'd13,
+                    state_STA = 6'd14, 
+                    state_STA2 = 6'd15, 
+                    state_STA3 = 6'd16, 
+                    state_STA4 = 6'd17, 
+                    state_STA5 = 6'd18,
+                    state_OR = 6'd19, 
+                    state_OR2 = 6'd20, 
+                    state_OR3 = 6'd21, 
+                    state_OR4 = 6'd22, 
+                    state_OR5 = 6'd23,
+                    state_AND = 6'd24, 
+                    state_AND2 = 6'd25, 
+                    state_AND3 = 6'd26, 
+                    state_AND4 = 6'd27, 
+                    state_AND5 = 6'd28,
+                    state_NOT = 6'd29,
+                    state_JMP = 6'd30, 
+                    state_JMP2 = 6'd31, 
+                    state_JMP3 = 6'd32,
+                    state_JN = 6'd33, 
+                    state_JN2 = 6'd34, 
+                    state_JN3 = 6'd35;
                     
     reg [5:0] state, next_state;
 
@@ -309,11 +310,11 @@ module Control_Block (
                 else if(OR)  next_state = state_OR;
                 else if(AND) next_state = state_AND;
                 else if(NOT) next_state = state_NOT;
-                else if(JMP || JN || JZ) next_state = state_JUMP;
+                else if(JMP) next_state = state_JMP;
+                else if(JN) next_state = state_JN;
                 else next_state = search1;
             end
             
-            // --- INÍCIO DO CICLO LDA (5 Estados) ---
             state_LDA: begin 
                 cargaREM = 1'b1; 
                 sel = 1'b0;
@@ -487,29 +488,46 @@ module Control_Block (
                 next_state = search1;
             end
 
-            state_JUMP: begin
+            state_JMP: begin 
                 cargaREM = 1'b1;
-                sel      = 1'b0;
-                next_state = state_JUMP2;
+                sel = 1'b0;
+                next_state = state_JMP2;
             end
-
-            state_JUMP2: begin
-                read     = 1'b1;
-                cargaRDM = 1'b1;
-                selRDM   = 1'b0;
-                next_state = state_JUMP3;
+            state_JMP2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JMP3;
             end
-
-            state_JUMP3: begin
+            state_JMP3: begin 
+                carga_PC = 1'b1;
                 incrementa_PC = 1'b1;
-                carga_PC = JMP | (JN & N) | (JZ & SZ);
-                gotot0   = 1'b1;
+                gotot0 = 1'b1;
                 next_state = search1;
             end
 
-            state_HLT: begin
-                next_state = state_HLT;
+            state_JN: begin 
+                if (N) begin
+                    cargaREM = 1'b1;
+                    sel = 1'b0;
+                    next_state = state_JN2;
+                end else begin
+                    incrementa_PC = 1'b1;
+                    gotot0 = 1'b1;
+                    next_state = search1;
+                end
             end
+            state_JN2: begin 
+                read = 1'b1; 
+                cargaRDM = 1'b1; 
+                next_state = state_JN3;
+            end
+            state_JN3: begin 
+                carga_PC = 1'b1;
+                incrementa_PC = 1'b1;
+                gotot0 = 1'b1;
+                next_state = search1;
+            end
+        
 
             default: begin
                 next_state = search1;
@@ -611,17 +629,37 @@ module mem_sis(
     //Memoria Ram - Vetor
     reg [7:0] mem [0:255];
     
-    initial mem [0] = 8'h20; 
-    initial mem [1] = 8'h06;
-  	initial mem [2] = 8'h30;
-  	initial mem [3] = 8'h07;
-  	initial mem [4] = 8'h60;
-    initial mem [5] = 8'h08;
-  	initial mem [6] = 8'h02;
-  	initial mem [7] = 8'h02;
-    initial mem [8] = 8'h02;
+initial begin
+    // teste
+    mem[8'h00] = 8'h20; // LDA 
+    mem[8'h01] = 8'h80;
+    mem[8'h02] = 8'h30; // ADD 
+    mem[8'h03] = 8'h81;
+    mem[8'h04] = 8'h10; // STA 
+    mem[8'h05] = 8'h82;
+    mem[8'h06] = 8'h40; // OR 
+    mem[8'h07] = 8'h83;
+    mem[8'h08] = 8'h50; // AND 
+    mem[8'h09] = 8'h84;
+    mem[8'h0A] = 8'h60; // NOT 
+    mem[8'h0B] = 8'h90; // JN 
+    mem[8'h0C] = 8'h10; // (pula para 10)
+    
+    mem[8'h10] = 8'h80; // JMP 
+    mem[8'h11] = 8'h15;
+    
+    mem[8'h15] = 8'h20; // LDA 
+    mem[8'h16] = 8'h85; 
+    mem[8'h17] = 8'h90; 
+    mem[8'h18] = 8'h1D; 
+    
+    mem[8'h80] = 8'hA5; 
+    mem[8'h81] = 8'h05; 
+    mem[8'h83] = 8'h55; 
+    mem[8'h84] = 8'h0F; 
+    mem[8'h85] = 8'h00; 
+end
 
-    //Constantes para os estados 
     parameter wait_m = 2'b00,
         write_m = 2'b01,
         read_m = 2'b10,
