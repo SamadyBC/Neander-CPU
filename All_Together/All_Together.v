@@ -676,16 +676,16 @@ initial begin
     mem[8'h08] = 8'h50; // AND 84
     mem[8'h09] = 8'h84;
     mem[8'h0A] = 8'h60; // NOT
-    mem[8'h0B] = 8'hA0; // JZ  20   (Z=0, segue reto)
-    mem[8'h0C] = 8'h20;
+    mem[8'h0B] = 8'hA0; // JZ  21   (Z=0, segue reto)
+    mem[8'h0C] = 8'h21;
     mem[8'h0D] = 8'h90; // JN  10   (N=1, desvia)
     mem[8'h0E] = 8'h10;
     mem[8'h0F] = 8'hF0; // HLT      armadilha
 
     mem[8'h10] = 8'h20; // LDA 85
     mem[8'h11] = 8'h85;
-    mem[8'h12] = 8'h90; // JN  20   (N=0, segue reto)
-    mem[8'h13] = 8'h20;
+    mem[8'h12] = 8'h90; // JN  21   (N=0, segue reto)
+    mem[8'h13] = 8'h21;
     mem[8'h14] = 8'hA0; // JZ  18   (Z=1, desvia)
     mem[8'h15] = 8'h18;
     mem[8'h16] = 8'hF0; // HLT      armadilha
@@ -698,11 +698,13 @@ initial begin
 
     mem[8'h1C] = 8'h20; // LDA 82   (prova o STA)
     mem[8'h1D] = 8'h82;
-    mem[8'h1E] = 8'hF0; // HLT      fim esperado
+    mem[8'h1E] = 8'h30; // ADD
+    mem[8'h1F] = 8'h81; // Address 81
+    mem[8'h20] = 8'hF0; // HLT      fim esperado
 
-    mem[8'h20] = 8'h20; // LDA 86   armadilha
-    mem[8'h21] = 8'h86;
-    mem[8'h22] = 8'hF0; // HLT
+    mem[8'h21] = 8'h20; // LDA 86   armadilha
+    mem[8'h22] = 8'h86;
+    mem[8'h23] = 8'hF0; // HLT
 
     // ---- dados ----
     mem[8'h80] = 8'hA5;
