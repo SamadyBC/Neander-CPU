@@ -1,5 +1,3 @@
-`timescale 1ns/1ns
-
 module Multiplexer_8bits (
     input wire       sel,
     input wire [7:0] in0, in1,

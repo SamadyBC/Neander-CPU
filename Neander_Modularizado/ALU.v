@@ -1,5 +1,3 @@
-`timescale 1ns/1ns
-
 module ALU (
     input wire [7:0] x, y,
     input wire [4:0] op_alu,

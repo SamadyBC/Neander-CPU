@@ -1,5 +1,3 @@
-`timescale 1ns/1ns
-
 module Main (
     input wire clk, reset,
     output wire [7:0] test
@@ -50,6 +48,7 @@ module Main (
         .OR(w_or),
         .AND(w_and),
         .SUB(w_sub),
+        .NOT(w_not),
         .JMP(w_jmp),
         .JN(w_jn),
         .JZ(w_jz),
@@ -86,7 +85,7 @@ module Main (
     ALU ALU_main (
         .x(w_saida_ac),
         .y(w_mem_output),
-        .op_alu({ALU_Y, ALU_NOT, ALU_OR, ALU_AND, ALU_ADD}),
+        .op_alu({w_ual_y, w_ual_not, w_ual_or, w_ual_and, w_ual_add}), 
         .out(ALU_out_input_AC),
         .n(w_ula_n),
         .z(w_ula_z)
@@ -151,8 +150,8 @@ module Main (
     //Área do MUX
     Multiplexer_8bits mux_main (
         .sel(w_sel),
-        .in0(w_mem_output),
-        .in1(w_pc_to_mux), //Aqui seria o wire de conexao do PC para o mux
+        .in0(w_pc_to_mux), 
+        .in1(w_mem_output), //Aqui seria o wire de conexao do PC para o mux
         .out(w_to_rem)
     );
 
