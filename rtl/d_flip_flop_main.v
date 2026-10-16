@@ -1,4 +1,4 @@
-module D_Flip_Flop_main #(
+module d_flip_flop_main #(
     parameter N = 8
 )(
     input wire clk, reset, enable,

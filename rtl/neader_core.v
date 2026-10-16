@@ -1,4 +1,4 @@
-module Main (
+module neader_core (
     input wire clk, reset,
     output wire [7:0] test
 );
@@ -40,7 +40,7 @@ module Main (
         .rdm_out(w_mem_output)
     );
 
-    Control_Block Control (
+    control_block Control (
         .NOP(w_nop),
         .STA(w_sta),
         .LDA(w_lda),
@@ -82,7 +82,7 @@ module Main (
 
     //Instanciação da ULA
 
-    ALU ALU_main (
+    alu ALU_main (
         .x(w_saida_ac),
         .y(w_mem_output),
         .op_alu({w_ual_y, w_ual_not, w_ual_or, w_ual_and, w_ual_add}), 
@@ -96,7 +96,7 @@ module Main (
 
     // Area dos Registradores 
     //Aqui é um contador trocar
-    PC PC_main (
+    pc PC_main (
         .clk(clk),
         .reset(reset),
         .enable(incrementa_PC),
@@ -105,7 +105,7 @@ module Main (
         .count(w_pc_to_mux)
     );
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(8)
     ) AC (
         .clk(clk),
@@ -115,7 +115,7 @@ module Main (
         .data_out(w_saida_ac)
     );
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(8)
     ) RI (
         .clk(clk),
@@ -127,7 +127,7 @@ module Main (
 
 
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(1)
     ) N (
         .clk(clk),
@@ -137,7 +137,7 @@ module Main (
         .data_out(n_to_cntrl)
     );
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(1)
     ) Z (
         .clk(clk),
@@ -148,7 +148,7 @@ module Main (
     );
 
     //Área do MUX
-    Multiplexer_8bits mux_main (
+    multiplexer_8bits mux_main (
         .sel(w_sel),
         .in0(w_pc_to_mux), 
         .in1(w_mem_output), //Aqui seria o wire de conexao do PC para o mux

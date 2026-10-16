@@ -1,1 +1,14 @@
 *.vvp
+
+# Reproducible simulation outputs
+sim/build/
+*.vcd
+
+# Local agent instructions
+agent-dir/
+
+# Local refactoring notes
+docs/
+
+# Advanced SystemVerilog bench kept locally
+testbenches/tb_six_programs.sv

@@ -1,4 +1,4 @@
-module Control_Block (
+module control_block (
     input wire NOP, STA, LDA, ADD, OR, AND, SUB, NOT, JMP, JN, JZ, N, SZ, clk, hlt, rst,
     output reg cargaRI, gotot0, selRDM, carga_AC, carga_NZ, carga_PC, incrementa_PC, cargaREM, sel, selREM, write, read, UALy, UALadd, UALor, UALand, UALnot, cargaRDM
 );

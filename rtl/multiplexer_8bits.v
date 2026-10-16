@@ -1,4 +1,4 @@
-module Multiplexer_8bits (
+module multiplexer_8bits (
     input wire       sel,
     input wire [7:0] in0, in1,
     output reg [7:0] out

@@ -1,4 +1,4 @@
-module ALU (
+module alu (
     input wire [7:0] x, y,
     input wire [4:0] op_alu,
     output reg [7:0] out,

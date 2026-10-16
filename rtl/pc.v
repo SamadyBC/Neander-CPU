@@ -1,4 +1,4 @@
-module PC (
+module pc (
     output reg [7:0] count,
     input wire clk, reset, enable, Load,
     input wire [7:0] count_in
