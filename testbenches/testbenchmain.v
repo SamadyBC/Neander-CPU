@@ -10,7 +10,7 @@ module tb_Main;
     wire [7:0] test;
 
     // Instanciação do módulo Main (seu processador)
-    Main uut (
+    neader_core uut (
         .clk(clk),
         .reset(reset),
         .test(test)
@@ -28,12 +28,13 @@ module tb_Main;
         clk = 0;
         reset = 1;
 
-        // Mantém o reset em nível alto por 15ns (passando da primeira borda de subida)
-        #15;
+        // Load RAM while reset is asserted; release on a falling edge.
+        #1;
+        $readmemh("mem/prog_original.mem", uut.mem_main.mem);
+        repeat (3) @(negedge clk);
         reset = 0;
 
-        // Deixa a simulação rodar tempo suficiente para buscar e executar a instrução
-        // Como o acesso e execução demoram alguns ciclos, 100ns deve ser suficiente para ver o teste
+        // Allow 120 clocks for the original program (116 clocks to HLT).
         #1200;
         
         // Exibe o valor final no terminal
@@ -46,7 +47,8 @@ module tb_Main;
 
     // Monitora e imprime no terminal sempre que a variável 'test' mudar de valor
     always @(test) begin
-        $display("Tempo: %0t ns | reset: %b | test: %h", $time, reset, test);
+        // $time is in this module's unit (1 ns); %0t would print picoseconds.
+        $display("Tempo: %0d ns | reset: %b | test: %h", $time, reset, test);
     end
 
 endmodule

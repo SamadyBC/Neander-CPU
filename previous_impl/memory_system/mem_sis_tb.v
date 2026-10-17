@@ -6,18 +6,19 @@ module mem_sis_tb;
     reg r_z, write, read, clr, mux_sel1, rem_e, rdm_e;
     reg clk = 1'b0;
     wire [7:0] rdm_out;
-    wire [7:0] test_ram0;
-    wire [7:0] test_ram1; 
-    wire [7:0] test_ram2; 
-    wire [7:0] test_ram3; 
-    wire [7:0] test_ram4; 
-    wire [7:0] test_ram5; 
-    wire [7:0] test_ram6; 
-    wire [7:0] test_ram7; 
-
-    mem_sis DUT01(
-       rem_d, mux1, r_z, write, read, clr, mux_sel1, rem_e, rdm_e, clk,
-       rdm_out, test_ram0, test_ram1, test_ram2, test_ram3, test_ram4, test_ram5, test_ram6, test_ram7
+    mem_sis DUT01 (
+        .rem_d(rem_d),
+        .mux1(mux1),
+        .r_z(r_z),
+        .write(write),
+        .read(read),
+        .clr(clr),
+        .mux_sel1(mux_sel1),
+        .rem_e(rem_e),
+        .rdm_e(rdm_e),
+        .clk(clk),
+        .rdm_out(rdm_out),
+        .debug_output()
     );
 
     always #5 clk = ~clk;
@@ -67,6 +68,12 @@ module mem_sis_tb;
         read = 1'b0;
         #10;
         
+        // The sequence writes 01 to address 00, resets the registers,
+        // then reads the same address. Reset must preserve RAM contents.
+        if (DUT01.mem[0] !== 8'h01 || rdm_out !== 8'h01)
+            $fatal(1, "Memory test failed: mem[0]=%h rdm_out=%h",
+                   DUT01.mem[0], rdm_out);
+        $display("PASS: wrote and read 01 at address 00 across register reset");
         $finish;
     end
 

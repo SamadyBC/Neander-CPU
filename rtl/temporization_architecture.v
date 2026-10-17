@@ -1,6 +1,6 @@
 `timescale 1ns/1ns
 
-module Temporization_architecture (
+module temporization_architecture (
     input wire clk,
     input wire halt, goto_t0,
     output reg  t0, t1, t2, t3, t4, t5, t6, t7
@@ -9,19 +9,19 @@ module Temporization_architecture (
     wire to_reg2, to_counter, hlt_to_dec;
     wire [2:0] to_dec; 
 
-     D_Flip_Flop  u1(
+     d_flip_flop  u1(
         .Q(to_reg2),
         .clk(clk),
         .D(goto_t0)
     );
 
-     D_Flip_Flop  u2(
+     d_flip_flop  u2(
         .Q(to_counter),
         .clk(clk),
         .D(to_reg2)
     );
 
-     Counter  u3(
+     counter  u3(
         .Count(to_dec),
         .Clock(clk),
         .Reset(to_counter)

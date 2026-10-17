@@ -1,4 +1,6 @@
-module Main (
+`timescale 1ns/1ps
+
+module neader_core (
     input wire clk, reset,
     output wire [7:0] test
 );
@@ -16,11 +18,10 @@ module Main (
     wire w_nop, w_sta, w_lda, w_add, w_or, w_and, w_not, w_jmp, w_jn, w_jz, w_hlt;
     // Wires de transmissao de sinais de saida do bloco de controle para ULA, Registradores, Memoria
     wire w_carga_pc, w_ual_y, w_ual_add, w_ual_or, w_ual_and, w_ual_not, w_ula_n, w_ula_z;
-    wire w_sel, w_write, w_read, w_sel_rdm, w_carga_rem, w_sub, w_carga_rdm, w_carga_ac, w_carga_ri, w_carga_nz;
+    wire w_sel, w_write, w_read, w_sel_rdm, w_carga_rem, w_carga_rdm, w_carga_ac, w_carga_ri, w_carga_nz;
     // Wire conexao saida multiplexador que encaminha dados para o registradore de enderecos da memoria
     wire [7:0] w_to_rem;
 
-    wire unused;
     assign test = w_saida_ac;
 
 // Memória
@@ -40,14 +41,14 @@ module Main (
         .rdm_out(w_mem_output)
     );
 
-    Control_Block Control (
+    control_block Control (
         .NOP(w_nop),
         .STA(w_sta),
         .LDA(w_lda),
         .ADD(w_add),
         .OR(w_or),
         .AND(w_and),
-        .SUB(w_sub),
+        .SUB(1'b0),         // Neander nao tem SUB; entrada fixa em 0
         .NOT(w_not),
         .JMP(w_jmp),
         .JN(w_jn),
@@ -58,7 +59,7 @@ module Main (
         .hlt(w_hlt),
         .rst(reset),
         .cargaRI(w_carga_ri),
-        .gotot0(unused),
+        .gotot0(),          // saida nao usada: deixada desconectada
         .selRDM(w_sel_rdm),
         .carga_AC(w_carga_ac),
         .carga_NZ(w_carga_nz),
@@ -66,7 +67,7 @@ module Main (
         .incrementa_PC(incrementa_PC),
         .cargaREM(w_carga_rem),
         .sel(w_sel),
-        .selREM(unused),
+        .selREM(),          // saida nao usada: deixada desconectada
         .write(w_write),
         .read(w_read),
         .UALy(w_ual_y),
@@ -82,7 +83,7 @@ module Main (
 
     //Instanciação da ULA
 
-    ALU ALU_main (
+    alu ALU_main (
         .x(w_saida_ac),
         .y(w_mem_output),
         .op_alu({w_ual_y, w_ual_not, w_ual_or, w_ual_and, w_ual_add}), 
@@ -96,7 +97,7 @@ module Main (
 
     // Area dos Registradores 
     //Aqui é um contador trocar
-    PC PC_main (
+    pc PC_main (
         .clk(clk),
         .reset(reset),
         .enable(incrementa_PC),
@@ -105,7 +106,7 @@ module Main (
         .count(w_pc_to_mux)
     );
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(8)
     ) AC (
         .clk(clk),
@@ -115,7 +116,7 @@ module Main (
         .data_out(w_saida_ac)
     );
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(8)
     ) RI (
         .clk(clk),
@@ -127,7 +128,7 @@ module Main (
 
 
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(1)
     ) N (
         .clk(clk),
@@ -137,7 +138,7 @@ module Main (
         .data_out(n_to_cntrl)
     );
 
-    D_Flip_Flop_main #(
+    d_flip_flop_main #(
         .N(1)
     ) Z (
         .clk(clk),
@@ -148,7 +149,7 @@ module Main (
     );
 
     //Área do MUX
-    Multiplexer_8bits mux_main (
+    multiplexer_8bits mux_main (
         .sel(w_sel),
         .in0(w_pc_to_mux), 
         .in1(w_mem_output), //Aqui seria o wire de conexao do PC para o mux

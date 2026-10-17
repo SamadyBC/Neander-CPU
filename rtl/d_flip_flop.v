@@ -1,4 +1,4 @@
-module D_Flip_Flop (
+module d_flip_flop (
     output reg Q,
     input wire clk, D
     );

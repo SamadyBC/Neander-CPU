@@ -3056,4 +3056,26 @@
          y="118.55409"
          id="tspan251">reset = 1</tspan></text>
   </g>
+
+  <g inkscape:groupmode="layer" inkscape:label="RTL completions" id="layer_rtl_completions">
+    <path style="fill:none;stroke:#000000;stroke-width:0.448464;stroke-linecap:butt;stroke-linejoin:miter" d="M 109.9700,41.5150 L 109.9700,21.3580"/>
+    <path style="fill:#000000;stroke:none" d="M 109.9700,19.7300 L 111.0406,21.3580 L 108.8994,21.3580 Z"/>
+    <text xml:space="preserve" style="font-size:2.11667px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman';fill:#000000;stroke:none;text-anchor:middle" x="117.2000" y="27.4000"><tspan x="117.2000" dy="0">cargaAC = 1</tspan><tspan x="117.2000" dy="2.6458">cargaNZ = 1</tspan><tspan x="117.2000" dy="2.6458">ualY = 0</tspan><tspan x="117.2000" dy="2.6458">ualNOT = 1</tspan><tspan x="117.2000" dy="2.6458">goto0 = 1</tspan></text>
+    <path style="fill:none;stroke:#000000;stroke-width:0.448464;stroke-linecap:butt;stroke-linejoin:miter" d="M 197.8450,41.8551 L 197.8964,41.6715 L 197.9606,41.4921 L 198.0373,41.3176 L 198.1262,41.1489 L 198.2267,40.9870 L 198.3384,40.8325 L 198.4607,40.6863 L 198.5931,40.5491 L 198.7348,40.4216 L 198.8851,40.3044 L 199.0433,40.1981 L 199.2086,40.1032 L 199.3803,40.0202 L 199.5573,39.9496 L 199.7389,39.8916 L 199.9241,39.8465 L 200.1121,39.8147 L 200.3018,39.7962 L 200.4923,39.7911 L 200.6828,39.7995 L 200.8721,39.8212 L 201.0595,39.8563 L 201.2439,39.9046 L 201.4245,39.9657 L 201.6003,40.0394 L 201.7704,40.1253 L 201.9341,40.2230 L 202.0905,40.3321 L 202.2387,40.4518 L 202.3782,40.5818 L 202.5082,40.7213 L 202.6279,40.8695 L 202.7370,41.0259 L 202.8347,41.1896 L 202.9206,41.3597 L 202.9943,41.5355 L 203.0554,41.7161 L 203.1037,41.9005 L 203.1388,42.0879 L 203.1605,42.2772 L 203.1689,42.4677 L 203.1638,42.6582 L 203.1453,42.8479 L 203.1135,43.0359 L 203.0684,43.2211 L 203.0104,43.4027 L 202.9398,43.5797 L 202.8568,43.7514 L 202.7619,43.9167 L 202.6556,44.0749 L 202.5384,44.2252"/>
+    <path style="fill:#000000;stroke:none" d="M 201.1049,45.1150 L 202.4350,43.6911 L 202.9392,45.7721 Z"/>
+    <path style="fill:none;stroke:#000000;stroke-width:0.448464;stroke-linecap:butt;stroke-linejoin:miter" d="M 147.2650,70.3000 L 133.3280,70.3000"/>
+    <path style="fill:#000000;stroke:none" d="M 131.7000,70.3000 L 133.3280,69.2294 L 133.3280,71.3706 Z"/>
+    <text xml:space="preserve" style="font-size:2.11667px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman';fill:#000000;stroke:none;text-anchor:middle" x="139.6000" y="69.0000"><tspan x="139.6000" dy="0">NOP</tspan></text>
+    <text xml:space="preserve" style="font-size:2.11667px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman';fill:#000000;stroke:none;text-anchor:middle" x="139.6000" y="73.6000"><tspan x="139.6000" dy="0">state = 0</tspan></text>
+    <circle cx="128.0" cy="70.3" r="3.7" style="fill:#87e2ff;fill-opacity:0.771028;stroke:#000000;stroke-width:0.274782;stroke-dasharray:0.9,0.6"/>
+    <text xml:space="preserve" style="font-size:2.82222px;font-family:'Times New Roman';fill:#000000;text-anchor:middle" x="128.0000" y="71.2500">S_1</text>
+    <text xml:space="preserve" style="font-size:2.11667px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman';fill:#000000;stroke:none;text-anchor:middle" x="213.2000" y="117.3000"><tspan x="213.2000" dy="0">N = 1</tspan></text>
+    <path style="fill:none;stroke:#000000;stroke-width:0.448464;stroke-linecap:butt;stroke-linejoin:miter" d="M 200.7000,131.4850 L 200.7000,136.4000 L 277.7020,136.4000"/>
+    <path style="fill:#000000;stroke:none" d="M 279.3300,136.4000 L 277.7020,137.4706 L 277.7020,135.3294 Z"/>
+    <text xml:space="preserve" style="font-size:2.11667px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman';fill:#000000;stroke:none;text-anchor:middle" x="240.0000" y="139.9000"><tspan x="240.0000" dy="0">N = 0</tspan><tspan x="240.0000" dy="2.6458">incrementaPC = 1</tspan><tspan x="240.0000" dy="2.6458">goto0 = 1</tspan></text>
+    <text xml:space="preserve" style="font-size:2.11667px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman';fill:#000000;stroke:none;text-anchor:end" x="177.4000" y="193.4000"><tspan x="177.4000" dy="0">Z = 1</tspan></text>
+    <path style="fill:none;stroke:#000000;stroke-width:0.448464;stroke-linecap:butt;stroke-linejoin:miter" d="M 184.9950,181.7200 L 200.5000,181.7200 L 200.5000,219.5000 L 289.4020,219.5000"/>
+    <path style="fill:#000000;stroke:none" d="M 291.0300,219.5000 L 289.4020,220.5706 L 289.4020,218.4294 Z"/>
+    <text xml:space="preserve" style="font-size:2.11667px;line-height:1.25;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman';fill:#000000;stroke:none;text-anchor:middle" x="240.0000" y="211.6000"><tspan x="240.0000" dy="0">Z = 0</tspan><tspan x="240.0000" dy="2.6458">incrementaPC = 1</tspan><tspan x="240.0000" dy="2.6458">goto0 = 1</tspan></text>
+  </g>
 </svg>

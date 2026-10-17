@@ -1,4 +1,4 @@
-module Counter (
+module counter (
     output reg [2:0] Count,
     input wire Clock, Reset 
 );
