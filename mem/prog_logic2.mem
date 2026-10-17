@@ -1,10 +1,10 @@
-// LDA 0F; NOT -> F0; STA 82; HLT
-20
+// Logic program 2: NOT 7F = 80. Only bit 7 is set, so Z must stay 0 and N must be 1.
+20 // 00: LDA 80 - load 7F
 80
-60
-10
+60 // 02: NOT - 01111111 becomes 10000000 (80)
+10 // 03: STA 82
 82
-f0
+f0 // 05: HLT - final PC is 06
 00
 00
 00
@@ -127,7 +127,7 @@ f0
 00
 00
 00
-0f
+7f // 80: 7F
 00
 00
 00

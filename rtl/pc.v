@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module pc (
     output reg [7:0] count,
     input wire clk, reset, enable, Load,

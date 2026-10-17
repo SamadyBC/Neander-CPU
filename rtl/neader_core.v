@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module neader_core (
     input wire clk, reset,
     output wire [7:0] test
@@ -16,11 +18,10 @@ module neader_core (
     wire w_nop, w_sta, w_lda, w_add, w_or, w_and, w_not, w_jmp, w_jn, w_jz, w_hlt;
     // Wires de transmissao de sinais de saida do bloco de controle para ULA, Registradores, Memoria
     wire w_carga_pc, w_ual_y, w_ual_add, w_ual_or, w_ual_and, w_ual_not, w_ula_n, w_ula_z;
-    wire w_sel, w_write, w_read, w_sel_rdm, w_carga_rem, w_sub, w_carga_rdm, w_carga_ac, w_carga_ri, w_carga_nz;
+    wire w_sel, w_write, w_read, w_sel_rdm, w_carga_rem, w_carga_rdm, w_carga_ac, w_carga_ri, w_carga_nz;
     // Wire conexao saida multiplexador que encaminha dados para o registradore de enderecos da memoria
     wire [7:0] w_to_rem;
 
-    wire unused;
     assign test = w_saida_ac;
 
 // Memória
@@ -47,7 +48,7 @@ module neader_core (
         .ADD(w_add),
         .OR(w_or),
         .AND(w_and),
-        .SUB(w_sub),
+        .SUB(1'b0),         // Neander nao tem SUB; entrada fixa em 0
         .NOT(w_not),
         .JMP(w_jmp),
         .JN(w_jn),
@@ -58,7 +59,7 @@ module neader_core (
         .hlt(w_hlt),
         .rst(reset),
         .cargaRI(w_carga_ri),
-        .gotot0(unused),
+        .gotot0(),          // saida nao usada: deixada desconectada
         .selRDM(w_sel_rdm),
         .carga_AC(w_carga_ac),
         .carga_NZ(w_carga_nz),
@@ -66,7 +67,7 @@ module neader_core (
         .incrementa_PC(incrementa_PC),
         .cargaREM(w_carga_rem),
         .sel(w_sel),
-        .selREM(unused),
+        .selREM(),          // saida nao usada: deixada desconectada
         .write(w_write),
         .read(w_read),
         .UALy(w_ual_y),

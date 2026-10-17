@@ -47,7 +47,8 @@ module tb_Main;
 
     // Monitora e imprime no terminal sempre que a variável 'test' mudar de valor
     always @(test) begin
-        $display("Tempo: %0t ns | reset: %b | test: %h", $time, reset, test);
+        // $time is in this module's unit (1 ns); %0t would print picoseconds.
+        $display("Tempo: %0d ns | reset: %b | test: %h", $time, reset, test);
     end
 
 endmodule

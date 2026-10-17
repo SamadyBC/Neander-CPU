@@ -24,7 +24,7 @@ The Neander architecture is a classic 8-bit accumulator-based computer model. Th
 
 Key characteristics:
 - **Data & Address Width**: 8-bit data bus and 8-bit memory address space (256 bytes memory capacity).
-- **Architecture Type**: Accumulator-based CPU, Von-Neumman.
+- **Architecture Type**: Accumulator-based CPU, von Neumann.
 - **Condition Flags**: `N` (Negative) and `Z` (Zero).
 - **Execution Scheme**: Micro-sequenced Finite State Machine controlling instruction fetch, decode, and execution cycles.
 
@@ -41,11 +41,8 @@ Key characteristics:
 │   ├── alu.v                       # 8-bit Arithmetic Logic Unit
 │   ├── pc.v                        # Program Counter (8-bit)
 │   ├── decoder.v                   # Instruction Opcode Decoder
-│   ├── multiplexer_8bits.v          # 8-bit 2-to-1 Multiplexer
-│   ├── d_flip_flop_main.v          # N-bit Register / Flip-Flop
-│   ├── d_flip_flop.v               # Single-bit Flip-Flop
-│   ├── counter.v                   # 3-bit Counter
-│   └── temporization_architecture.v # Timing signal generator
+│   ├── multiplexer_8bits.v         # 8-bit 2-to-1 Multiplexer
+│   └── d_flip_flop_main.v          # N-bit Register / Flip-Flop
 ├── testbenches/
 │   ├── testbenchmain.v             # Basic CPU testbench
 │   └── individual_programs_tb.v    # Six individual tests plus the original program
@@ -63,9 +60,13 @@ Key characteristics:
 │   ├── neander/
 │   │   ├── All_Together.v          # Original combined CPU implementation
 │   │   └── testbenchmain.v         # Matching original CPU testbench
-│   └── memory_system/
-│       ├── mem_sis.v              # Standalone memory subsystem copy
-│       └── mem_sis_tb.v           # Memory write/reset/readback testbench
+│   ├── memory_system/
+│   │   ├── mem_sis.v              # Standalone memory subsystem copy
+│   │   └── mem_sis_tb.v           # Memory write/reset/readback testbench
+│   └── timing_generator/          # t0-t7 timing generator from the first design;
+│       ├── temporization_architecture.v  # not instantiated: the control FSM
+│       ├── counter.v              #   in control_block.v replaced it
+│       └── d_flip_flop.v
 ├── images/                         # Architecture and FSM diagrams
 └── README.md
 ```
@@ -236,9 +237,9 @@ After instruction fetch, PC points to the jump's target-address byte. A taken ju
 
 NOP has no extra execution state: `decode_state` returns directly to `search1`. HLT loops until reset. Asserting `rst` asynchronously sets the control state to `search1`; the top-level reset also clears PC, AC, RI, flags and memory registers, preserving RAM. An unrecognized control-state encoding returns to `search1` with default outputs.
 
-The existing illustration below has known omissions; the tables above describe the current RTL, including both conditional-branch paths and the correct STA sequence.
+The diagram below shows every state and transition in `rtl/control_block.v`, including NOP, the HLT hold loop, and both outcomes of JN and JZ. Labels on each arrow list the controls asserted in the state where the arrow starts. The dashed `S_1` node is a connector to the same `search1` state, used to avoid crossing lines. The editable source is `images/sys_fsm.svg` (Inkscape); a PDF version is in `images/sys_fsm.pdf`.
 
-![Control Block FSM](images/mem_sys.png)
+![Control Block FSM](images/sys_fsm.png)
 
 ---
 
@@ -289,48 +290,58 @@ The verification runner generates VCD waveforms under `sim/build/` for verifying
 | Test | Memory file | Operation | Final AC | Checked RAM | Final PC | N/Z |
 | :---: | :--- | :--- | :---: | :--- | :---: | :---: |
 | 1 | `prog_sum1.mem` | A5 + 05 | AA | `[82] = AA` | 07 | 1/0 |
-| 2 | `prog_sum2.mem` | AA + 05 | AF | `[82] = AF` | 07 | 1/0 |
-| 3 | `prog_logic1.mem` | (AA OR 55) AND 0F | 0F | `[83] = 0F` | 09 | 0/0 |
-| 4 | `prog_logic2.mem` | NOT 0F | F0 | `[82] = F0` | 06 | 1/0 |
+| 2 | `prog_sum2.mem` | F0 + 0F + 01 (8-bit overflow) | 00 | `[83] = 00` | 09 | 0/1 |
+| 3 | `prog_logic1.mem` | (AA OR 0F) AND 3C | 2C | `[83] = 2C` | 09 | 0/0 |
+| 4 | `prog_logic2.mem` | NOT 7F | 80 | `[82] = 80` | 06 | 1/0 |
 | 5 | `prog_jump1.mem` | JZ skips an early halt | A5 | `[82] = A5` | 0A | 1/0 |
 | 6 | `prog_jump2.mem` | JN skips an early halt | A5 | `[82] = A5` | 08 | 1/0 |
 | 7 | `prog_original.mem` | Original complete program | AF | `[82] = AA` | 21 | 1/0 |
 
-**Tests 1 and 2: additions**
-
-Both programs use the same instruction sequence, with different initial data:
+**Test 1: addition of two operands**
 
 ```text
-00: LDA 80
-02: ADD 81
+00: LDA 80       ; Load A5
+02: ADD 81       ; A5 + 05 = AA
 04: STA 82
 06: HLT
 ```
 
-Test 1 supplies `RAM[80] = A5` and `RAM[81] = 05`, producing `AA`. Test 2 supplies `AA` and `05`, producing `AF`; it does not depend on test 1. Both store their result at address `82`. Fetching HLT at `06` advances the PC to `07`. Both results have bit 7 set, so N=1; neither is zero, so Z=0.
+The result `AA` is stored at `82`. Fetching HLT at `06` advances the PC to `07`. The result has bit 7 set, so N=1, and it is not zero, so Z=0.
+
+**Test 2: addition of three operands with overflow**
+
+```text
+00: LDA 80       ; Load F0
+02: ADD 81       ; F0 + 0F = FF
+04: ADD 82       ; FF + 01 = 100: only the low byte 00 is kept
+06: STA 83
+08: HLT
+```
+
+This program chains two ADDs and exceeds eight bits. The carry is discarded (the Neander has no carry flag), so AC=`00`, Z=1 and N=0. Address `83` starts with the marker `EE`, so finding `00` there proves that STA wrote the result. The final PC is `09`.
 
 **Test 3: OR and AND**
 
 ```text
 00: LDA 80       ; Load AA
-02: OR  81       ; AA OR 55 = FF
-04: AND 82       ; FF AND 0F = 0F
+02: OR  81       ; AA OR 0F = AF
+04: AND 82       ; AF AND 3C = 2C
 06: STA 83
 08: HLT
 ```
 
-The accumulator progresses through `AA -> FF -> 0F`. The result is stored at `83` because address `82` holds the AND operand. The final PC is `09`, with N=0 and Z=0.
+The accumulator progresses through `AA -> AF -> 2C`. The operands share set bits, so a faulty OR that behaved like XOR (`A5`) or ADD (`B9`) would change the result, and so would an AND that passed its operand through (`3C`). The result is stored at `83` because address `82` holds the AND operand. The final PC is `09`, with N=0 and Z=0.
 
 **Test 4: NOT**
 
 ```text
-00: LDA 80       ; Load 0F
-02: NOT          ; Invert 00001111 to 11110000 (F0)
+00: LDA 80       ; Load 7F
+02: NOT          ; Invert 01111111 to 10000000 (80)
 03: STA 82
 05: HLT
 ```
 
-NOT occupies one byte, so the following STA starts at `03`. The final result is `F0`, stored at `82`, with PC=`06`, N=1, and Z=0.
+NOT occupies one byte, so the following STA starts at `03`. The final result is `80`, stored at `82`, with PC=`06`, N=1, and Z=0. Because only bit 7 is set, the test also checks that Z considers all eight bits.
 
 **Test 5: conditional structure with JZ**
 

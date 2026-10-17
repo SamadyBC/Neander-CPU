@@ -43,54 +43,58 @@ module individual_programs_tb;
             errors = errors + 1;
         end
 
-        // Test 2: AA + 05 = AF. The starting AA is in this file.
+        // Test 2: F0 + 0F + 01 = 100h -> 00 (8-bit overflow), Z=1.
+        // RAM[83] starts as EE, so the check proves STA wrote the 00.
         reset = 1;
         #1;
         $readmemh("mem/prog_sum2.mem", dut.mem_main.mem);
         repeat (3) @(negedge clk);
         reset = 0;
         repeat (100) @(negedge clk);
-        if (test === 8'hAF && dut.mem_main.mem[8'h82] === 8'hAF &&
-            dut.PC_main.count === 8'h07 &&
-            dut.n_to_cntrl === 1'b1 && dut.z_to_cntrl === 1'b0 &&
+        if (test === 8'h00 && dut.mem_main.mem[8'h83] === 8'h00 &&
+            dut.PC_main.count === 8'h09 &&
+            dut.n_to_cntrl === 1'b0 && dut.z_to_cntrl === 1'b1 &&
             dut.Control.state === dut.Control.state_HLT)
-            $display("PASS: test 2 - addition AA + 05 = AF");
+            $display("PASS: test 2 - addition F0 + 0F + 01 = 00 (overflow, Z=1)");
         else begin
-            $display("FAIL: test 2 - AC=%h PC=%h RAM[82]=%h",
-                test, dut.PC_main.count, dut.mem_main.mem[8'h82]);
+            $display("FAIL: test 2 - AC=%h PC=%h RAM[83]=%h",
+                test, dut.PC_main.count, dut.mem_main.mem[8'h83]);
             errors = errors + 1;
         end
 
-        // Test 3: (AA OR 55) AND 0F = 0F; store at address 83.
+        // Test 3: (AA OR 0F) AND 3C = 2C; store at address 83.
+        // Operands share bits, so a wrong OR (XOR/ADD) or a wrong AND
+        // (pass-through) gives a different result.
         reset = 1;
         #1;
         $readmemh("mem/prog_logic1.mem", dut.mem_main.mem);
         repeat (3) @(negedge clk);
         reset = 0;
         repeat (100) @(negedge clk);
-        if (test === 8'h0F && dut.mem_main.mem[8'h83] === 8'h0F &&
+        if (test === 8'h2C && dut.mem_main.mem[8'h83] === 8'h2C &&
             dut.PC_main.count === 8'h09 &&
             dut.n_to_cntrl === 1'b0 && dut.z_to_cntrl === 1'b0 &&
             dut.Control.state === dut.Control.state_HLT)
-            $display("PASS: test 3 - OR and AND result = 0F");
+            $display("PASS: test 3 - (AA OR 0F) AND 3C = 2C");
         else begin
             $display("FAIL: test 3 - AC=%h PC=%h RAM[83]=%h",
                 test, dut.PC_main.count, dut.mem_main.mem[8'h83]);
             errors = errors + 1;
         end
 
-        // Test 4: NOT 0F = F0; store at address 82.
+        // Test 4: NOT 7F = 80; store at address 82.
+        // 80 has only bit 7 set: checks that Z looks at all eight bits.
         reset = 1;
         #1;
         $readmemh("mem/prog_logic2.mem", dut.mem_main.mem);
         repeat (3) @(negedge clk);
         reset = 0;
         repeat (100) @(negedge clk);
-        if (test === 8'hF0 && dut.mem_main.mem[8'h82] === 8'hF0 &&
+        if (test === 8'h80 && dut.mem_main.mem[8'h82] === 8'h80 &&
             dut.PC_main.count === 8'h06 &&
             dut.n_to_cntrl === 1'b1 && dut.z_to_cntrl === 1'b0 &&
             dut.Control.state === dut.Control.state_HLT)
-            $display("PASS: test 4 - NOT result = F0");
+            $display("PASS: test 4 - NOT 7F = 80");
         else begin
             $display("FAIL: test 4 - AC=%h PC=%h RAM[82]=%h",
                 test, dut.PC_main.count, dut.mem_main.mem[8'h82]);

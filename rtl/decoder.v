@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module decoder (
     input wire [3:0] Op,
     output reg nop, sta, lda, add, OR, AND, NOT, unused1, JMP, jn, jz, unused2, unused3, unused4, unused5, hlt
